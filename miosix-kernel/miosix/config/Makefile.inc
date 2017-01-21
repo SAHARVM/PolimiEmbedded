@@ -22,7 +22,7 @@
 #OPT_BOARD := stm32f207zg_ethboard_v2
 #OPT_BOARD := stm32f207ze_als_camboard
 #OPT_BOARD := stm32l151_als_mainboard
-#OPT_BOARD := stm32f407vg_bitsboard
+OPT_BOARD := stm32f407vg_bitsboard
 #OPT_BOARD := stm32f205rg_sony-newman
 #OPT_BOARD := stm32f429zi_stm32f4discovery
 #OPT_BOARD := stm32f103cb_als_mainboard_rev2
