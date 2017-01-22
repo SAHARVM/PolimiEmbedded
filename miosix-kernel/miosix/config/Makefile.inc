@@ -36,7 +36,7 @@
 #OPT_BOARD := stm32f401vc_stm32f4discovery
 #OPT_BOARD := stm32f103c8_breakout
 
-# ArtMon: Basing configuration of VESC Board on stm32f407vg_stm32f4discovery
+# ArtMon: Basing configuration of VESC Board on stm32f401vc_stm32f4discovery
 OPT_BOARD := stm32f405RGTx_VESC_4_12
 #End ArtMon
 
@@ -401,9 +401,9 @@ ifeq ($(OPT_BOARD),stm32f405RGTx_VESC_4_12)
     ## 3) Same as 1) but space has been reserved for a process pool, allowing
     ##    to configure the kernel with "#define WITH_PROCESSES"
     LINKER_SCRIPT_PATH := arch/cortexM4_stm32f4/stm32f405RGTx_VESC_4_12/
-    LINKER_SCRIPT := $(LINKER_SCRIPT_PATH)stm32_1m+192k_rom.ld
-    #LINKER_SCRIPT := $(LINKER_SCRIPT_PATH)stm32_1m+192k_ram.ld
-    #LINKER_SCRIPT := $(LINKER_SCRIPT_PATH)stm32_1m+192k_rom_processes.ld
+    LINKER_SCRIPT := $(LINKER_SCRIPT_PATH)stm32_256k+64k_rom.ld
+    #LINKER_SCRIPT := $(LINKER_SCRIPT_PATH)stm32_256m+64k_ram.ld
+    #LINKER_SCRIPT := $(LINKER_SCRIPT_PATH)stm32_256m+64k_rom_processes.ld
 
     ## This causes the interrupt vector table to be relocated in SRAM, must be
     ## uncommented when using the ram linker script
