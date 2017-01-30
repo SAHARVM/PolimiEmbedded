@@ -36,7 +36,7 @@
 #OPT_BOARD := stm32f401vc_stm32f4discovery
 #OPT_BOARD := stm32f103c8_breakout
 
-# ArtMon: Basing configuration of VESC Board on stm32f401vc_stm32f4discovery
+# ArtMon: Basing configuration of VESC Board on stm32f407vg_stm32f4discovery
 OPT_BOARD := stm32f405RGTx_VESC_4_12
 #End ArtMon
 
@@ -400,16 +400,17 @@ ifeq ($(OPT_BOARD),stm32f405RGTx_VESC_4_12)
     ## 2) Code + stack + heap in internal RAM (file *_ram.ld)
     ## 3) Same as 1) but space has been reserved for a process pool, allowing
     ##    to configure the kernel with "#define WITH_PROCESSES"
-    LINKER_SCRIPT_PATH := arch/cortexM4_stm32f4/stm32f405RGTx_VESC_4_12/
-    LINKER_SCRIPT := $(LINKER_SCRIPT_PATH)stm32_256k+64k_rom.ld
-    #LINKER_SCRIPT := $(LINKER_SCRIPT_PATH)stm32_256m+64k_ram.ld
-    #LINKER_SCRIPT := $(LINKER_SCRIPT_PATH)stm32_256m+64k_rom_processes.ld
+    LINKER_SCRIPT_PATH := arch/cortexM4_stm32f4/stm32f405rg_vesc412/
+    LINKER_SCRIPT := $(LINKER_SCRIPT_PATH)stm32_1m+192k_rom.ld
+    #LINKER_SCRIPT := $(LINKER_SCRIPT_PATH)stm32_1m+192k_ram.ld
+    #LINKER_SCRIPT := $(LINKER_SCRIPT_PATH)stm32_1m+192k_rom_processes.ld
 
     ## This causes the interrupt vector table to be relocated in SRAM, must be
     ## uncommented when using the ram linker script
     #SRAM_BOOT := -DVECT_TAB_SRAM
 
     ## Select clock frequency (HSE_VALUE is the xtal on board, fixed)
+    ## PLL sets the system clock frequency to 168MHz (max)
     CLOCK_FREQ := -DHSE_VALUE=8000000 -DSYSCLK_FREQ_168MHz=168000000
     #CLOCK_FREQ := -DHSE_VALUE=8000000 -DSYSCLK_FREQ_100MHz=100000000
     #CLOCK_FREQ := -DHSE_VALUE=8000000 -DSYSCLK_FREQ_84MHz=84000000
@@ -417,6 +418,8 @@ ifeq ($(OPT_BOARD),stm32f405RGTx_VESC_4_12)
 endif
 
 ## End ArtMon
+
+# No options
 
 ############################################################################
 ## From the options selected above, now fill all the variables needed to  ##
@@ -1173,7 +1176,7 @@ else ifeq ($(ARCH),cortexM4_stm32f4)
         ## board.
         PROGRAM_CMDLINE := qstlink2 -cqewV ./main.bin
 
-		##-------------------------------------------------------------------------
+    ##-------------------------------------------------------------------------
     
 	## ArtMon:
 	## BOARD: stm32f405RGTx_VESC_4_12
@@ -1181,7 +1184,7 @@ else ifeq ($(ARCH),cortexM4_stm32f4)
 	else ifeq ($(OPT_BOARD),stm32f405RGTx_VESC_4_12)
         
 		## Base directory with header files for this board
-        BOARD_INC := arch/cortexM4_stm32f4/stm32f405RGTx_VESC_4_12
+        BOARD_INC := arch/cortexM4_stm32f4/stm32f405rg_vesc412
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
@@ -1206,7 +1209,7 @@ else ifeq ($(ARCH),cortexM4_stm32f4)
         ## The command must provide a way to program the board, or print an
         ## error message saying that 'make program' is not supported for that
         ## board.
-        PROGRAM_CMDLINE := qstlink2 -cqewV ./main.bin
+        ##PROGRAM_CMDLINE := qstlink2 -cqewV ./main.bin
 	
 	##End ArtMon
 		

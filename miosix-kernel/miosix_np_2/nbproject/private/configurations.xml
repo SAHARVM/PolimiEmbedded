@@ -473,7 +473,7 @@
                 <in>bsp_impl.h</in>
               </df>
             </df>
-            <df name="stm32f405RGTx_VESC_4_12">
+            <df name="stm32f405rg_vesc412">
               <df name="core">
                 <in>stage_1_boot.cpp</in>
               </df>
@@ -614,7 +614,7 @@
               <df name="stm32f401vc_stm32f4discovery">
                 <in>board_settings.h</in>
               </df>
-              <df name="stm32f405RGTx_VESC_4_12">
+              <df name="stm32f405rg_vesc412">
                 <in>board_settings.h</in>
               </df>
               <df name="stm32f407vg_bitsboard">

@@ -10,12 +10,7 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/1"/>
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/C:/Users/Arturo/Desktop/Politecnico%20di%20Milano/PolimiEmbedded/miosix-kernel/miosix/config/Makefile.inc</file>
-            <file>file:/C:/Users/Arturo/Desktop/Politecnico%20di%20Milano/PolimiEmbedded/miosix-kernel/main.cpp</file>
-            <file>file:/C:/Users/Arturo/Desktop/Politecnico%20di%20Milano/PolimiEmbedded/miosix-kernel/miosix/arch/cortexM4_stm32f4/stm32f405RGTx_VESC_4_12/interfaces-impl/bsp.cpp</file>
-            <file>file:/C:/Users/Arturo/Desktop/Politecnico%20di%20Milano/PolimiEmbedded/miosix-kernel/miosix/arch/cortexM4_stm32f4/stm32f405RGTx_VESC_4_12/core/stage_1_boot.d</file>
-        </group>
+        <group/>
     </open-files>
     <preferences xmlns="http://www.netbeans.org/ns/auxiliary-configuration-preferences/1">
         <module name="org-netbeans-modules-cnd-discovery">
