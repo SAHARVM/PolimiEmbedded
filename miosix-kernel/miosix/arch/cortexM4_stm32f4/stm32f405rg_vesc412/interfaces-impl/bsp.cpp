@@ -49,7 +49,7 @@
 
 namespace miosix {
 
-typedef Gpio<GPIOD_BASE,2>  cs43l22reset;
+//typedef Gpio<GPIOD_BASE,2>  cs43l22reset;
 
 //
 // Initialization
@@ -58,24 +58,27 @@ typedef Gpio<GPIOD_BASE,2>  cs43l22reset;
 void IRQbspInit()
 {
     //Enable all gpios
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN |
-                    RCC_AHB1ENR_GPIOCEN | RCC_AHB1ENR_GPIODEN |
-                    RCC_AHB1ENR_GPIOEEN | RCC_AHB1ENR_GPIOHEN;
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_GPIOCEN;
     RCC_SYNC();
-    GPIOA->OSPEEDR=0xaaaaaaaa; //Default to 50MHz speed for all GPIOS
+    
+    //Default to 50MHz speed for all GPIOS
+    GPIOA->OSPEEDR=0xaaaaaaaa;
     GPIOB->OSPEEDR=0xaaaaaaaa;
     GPIOC->OSPEEDR=0xaaaaaaaa;
-    GPIOD->OSPEEDR=0xaaaaaaaa;
-    GPIOE->OSPEEDR=0xaaaaaaaa;
-    GPIOH->OSPEEDR=0xaaaaaaaa;
+    
+    _greenLED::mode(Mode::OUTPUT);
     _redLED::mode(Mode::OUTPUT);
-    ledOn();
+    
+    greenLED_on();
     delayMs(100);
-    ledOff();
-    // On stm32f4discovery some of the SDIO pins conflict with the
-    // audio output chip, so keep it permanently reset to avoid issues
-    cs43l22reset::mode(Mode::OUTPUT);
-    cs43l22reset::low();
+    greenLED_off();
+    delayMs(100);
+    
+    redLED_on();
+    delayMs(100);
+    redLED_off();
+    
+    
     DefaultConsole::instance().IRQset(intrusive_ref_ptr<Device>(
         new STM32Serial(defaultSerial,defaultSerialSpeed,
         defaultSerialFlowctrl ? STM32Serial::RTSCTS : STM32Serial::NOFLOWCTRL)));

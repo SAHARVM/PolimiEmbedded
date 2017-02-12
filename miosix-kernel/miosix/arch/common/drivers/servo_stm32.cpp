@@ -34,10 +34,22 @@
 using namespace std;
 using namespace miosix;
 
-typedef Gpio<GPIOB_BASE,6> servo1out;
-typedef Gpio<GPIOB_BASE,7> servo2out;
-typedef Gpio<GPIOB_BASE,8> servo3out;
-typedef Gpio<GPIOB_BASE,9> servo4out;
+#ifdef VESC412 // VESC Servo output GPIO is at PB5
+/*The library definitions are pinned to other ports:
+ * -PB6: HALL1
+ * -PB7: HALL2
+ * -PB8: CAN_RX
+ * -PB9: CAN_TX
+ * therefore the VESC board needs another pinout definition
+ * -PB5: SERVO*/
+typedef Gpio<GPIOB_BASE,5> servo1out;
+#else
+//typedef Gpio<GPIOB_BASE,6> servo1out;
+//typedef Gpio<GPIOB_BASE,7> servo2out;
+//typedef Gpio<GPIOB_BASE,8> servo3out;
+//typedef Gpio<GPIOB_BASE,9> servo4out;
+#endif //VESC412
+
 static Thread *waiting=0;
 
 /**
@@ -97,10 +109,16 @@ void SynchronizedServo::enable(int channel)
                 TIM4->CCMR1 |= TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1PE;
                 TIM4->CCER |= TIM_CCER_CC1E;
                 #ifndef _ARCH_CORTEXM3_STM32 //Only stm32f2 and stm32f4 have it
+                #ifndef VESC412
                 servo1out::alternateFunction(2);
-                #endif //_ARCH_CORTEXM3_STM32
+                #endif // VESC412
+                #endif // _ARCH_CORTEXM3_STM32
+                #ifdef VESC412
+                servo1out::alternateFunction(5);
+                #endif //VESC412
                 servo1out::mode(Mode::ALTERNATE);
                 break;
+#ifndef VESC412
             case 1:
                 TIM4->CCMR1 |= TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2PE;
                 TIM4->CCER |= TIM_CCER_CC2E;
@@ -125,6 +143,7 @@ void SynchronizedServo::enable(int channel)
                 #endif //_ARCH_CORTEXM3_STM32
                 servo4out::mode(Mode::ALTERNATE);
                 break;
+#endif //VESC412
         }
     }
 }
@@ -144,6 +163,7 @@ void SynchronizedServo::disable(int channel)
                 servo1out::mode(Mode::INPUT);
                 TIM4->CCER &= ~TIM_CCER_CC1E;
                 break;
+#ifndef VESC412
             case 1:
                 servo2out::mode(Mode::INPUT);
                 TIM4->CCER &= ~TIM_CCER_CC2E;
@@ -156,6 +176,7 @@ void SynchronizedServo::disable(int channel)
                 servo4out::mode(Mode::INPUT);
                 TIM4->CCER &= ~TIM_CCER_CC4E;
                 break;
+#endif //VESC412
         }
     }
 }
