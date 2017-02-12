@@ -374,6 +374,11 @@
               </df>
               <in>arch_settings.h</in>
             </df>
+            <df name="stm32f405rg_vesc412">
+              <df name="interfaces-impl">
+                <in>bsp.cpp</in>
+              </df>
+            </df>
             <df name="stm32f407vg_bitsboard">
               <df name="core">
                 <in>stage_1_boot.cpp</in>
@@ -560,6 +565,7 @@
       <logicalFolder name="interfaces-impl"
                      displayName="interfaces-impl"
                      projectFiles="true">
+        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/interfaces-impl/arch_registers_impl.h</itemPath>
         <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/interfaces-impl/bsp.cpp</itemPath>
         <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/interfaces-impl/bsp_impl.h</itemPath>
       </logicalFolder>
@@ -4883,12 +4889,16 @@
       <item path="../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/core/stage_1_boot.cpp"
             ex="false"
             tool="1"
-            flavor2="0">
+            flavor2="8">
+        <ccTool flags="0">
+        </ccTool>
       </item>
       <item path="../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/interfaces-impl/bsp.cpp"
             ex="false"
             tool="1"
-            flavor2="0">
+            flavor2="8">
+        <ccTool flags="0">
+        </ccTool>
       </item>
       <item path="../main.cpp" ex="false" tool="1" flavor2="8">
         <ccTool flags="0">
@@ -4930,8 +4940,8 @@
       <item path="../miosix/arch/common/drivers/dcc.cpp"
             ex="false"
             tool="1"
-            flavor2="0">
-        <ccTool>
+            flavor2="8">
+        <ccTool flags="0">
           <incDir>
             <pElem>../miosix/arch/common/drivers</pElem>
             <pElem>../miosix/kernel</pElem>
@@ -5036,8 +5046,8 @@
       <item path="../miosix/arch/common/drivers/servo_stm32.cpp"
             ex="false"
             tool="1"
-            flavor2="0">
-        <ccTool>
+            flavor2="8">
+        <ccTool flags="0">
           <incDir>
             <pElem>../miosix/arch/common/drivers</pElem>
             <pElem>../miosix/kernel</pElem>
@@ -5069,8 +5079,8 @@
       <item path="../miosix/arch/common/drivers/stm32_hardware_rng.cpp"
             ex="false"
             tool="1"
-            flavor2="0">
-        <ccTool>
+            flavor2="8">
+        <ccTool flags="0">
           <incDir>
             <pElem>../miosix/arch/common/drivers</pElem>
             <pElem>../miosix/kernel</pElem>
@@ -5102,8 +5112,8 @@
       <item path="../miosix/arch/common/drivers/stm32f2_f4_i2c.cpp"
             ex="false"
             tool="1"
-            flavor2="0">
-        <ccTool>
+            flavor2="8">
+        <ccTool flags="0">
           <incDir>
             <pElem>../miosix/arch/common/drivers</pElem>
             <pElem>../miosix/kernel/scheduler</pElem>
@@ -5180,6 +5190,13 @@
           </incDir>
         </ccTool>
       </item>
+      <item path="../miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/interfaces-impl/bsp.cpp"
+            ex="false"
+            tool="1"
+            flavor2="8">
+        <ccTool flags="0">
+        </ccTool>
+      </item>
       <item path="../miosix/arch/cortexM4_stm32f4/stm32f407vg_stm32f4discovery/core/stage_1_boot.cpp"
             ex="false"
             tool="1"
@@ -5194,7 +5211,9 @@
         <ccTool flags="0">
         </ccTool>
       </item>
-      <item path="../miosix/e20/e20.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../miosix/e20/e20.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool flags="0">
+        </ccTool>
       </item>
       <item path="../miosix/filesystem/console/console_device.cpp"
             ex="false"
@@ -5359,8 +5378,8 @@
           </incDir>
         </ccTool>
       </item>
-      <item path="../miosix/kernel/SystemMap.cpp" ex="false" tool="1" flavor2="0">
-        <ccTool>
+      <item path="../miosix/kernel/SystemMap.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool flags="0">
           <incDir>
             <pElem>../../../../../../../arm-miosix-eabi/lib/gcc/arm-miosix-eabi/4.7.3/include</pElem>
             <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include</pElem>
@@ -5384,8 +5403,8 @@
           </incDir>
         </ccTool>
       </item>
-      <item path="../miosix/kernel/elf_program.cpp" ex="false" tool="1" flavor2="0">
-        <ccTool>
+      <item path="../miosix/kernel/elf_program.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool flags="0">
           <incDir>
             <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3</pElem>
             <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/bits</pElem>
@@ -5467,8 +5486,8 @@
           </undefinedList>
         </ccTool>
       </item>
-      <item path="../miosix/kernel/process.cpp" ex="false" tool="1" flavor2="0">
-        <ccTool>
+      <item path="../miosix/kernel/process.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool flags="0">
           <incDir>
             <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/bits</pElem>
             <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3</pElem>
@@ -5494,8 +5513,8 @@
           </incDir>
         </ccTool>
       </item>
-      <item path="../miosix/kernel/process_pool.cpp" ex="false" tool="1" flavor2="0">
-        <ccTool>
+      <item path="../miosix/kernel/process_pool.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool flags="0">
           <incDir>
             <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3</pElem>
             <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/bits</pElem>
@@ -5553,12 +5572,16 @@
       <item path="../miosix/kernel/scheduler/control/control_scheduler.cpp"
             ex="false"
             tool="1"
-            flavor2="0">
+            flavor2="8">
+        <ccTool flags="0">
+        </ccTool>
       </item>
       <item path="../miosix/kernel/scheduler/edf/edf_scheduler.cpp"
             ex="false"
             tool="1"
-            flavor2="0">
+            flavor2="8">
+        <ccTool flags="0">
+        </ccTool>
       </item>
       <item path="../miosix/kernel/scheduler/priority/priority_scheduler.cpp"
             ex="false"
@@ -5596,8 +5619,8 @@
           </undefinedList>
         </ccTool>
       </item>
-      <item path="../miosix/kernel/sync.cpp" ex="false" tool="1" flavor2="0">
-        <ccTool>
+      <item path="../miosix/kernel/sync.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool flags="0">
           <incDir>
             <pElem>../miosix/kernel</pElem>
             <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/bits</pElem>
@@ -5626,8 +5649,8 @@
       <item path="../miosix/kernel/timeconversion.cpp"
             ex="false"
             tool="1"
-            flavor2="0">
-        <ccTool>
+            flavor2="8">
+        <ccTool flags="0">
           <incDir>
             <pElem>../miosix/kernel</pElem>
             <pElem>../miosix</pElem>
@@ -5679,15 +5702,15 @@
           </incDir>
         </ccTool>
       </item>
-      <item path="../miosix/util/crc16.cpp" ex="false" tool="1" flavor2="0">
-        <ccTool>
+      <item path="../miosix/util/crc16.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool flags="0">
           <incDir>
             <pElem>../miosix</pElem>
           </incDir>
         </ccTool>
       </item>
-      <item path="../miosix/util/lcd44780.cpp" ex="false" tool="1" flavor2="0">
-        <ccTool>
+      <item path="../miosix/util/lcd44780.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool flags="0">
           <incDir>
             <pElem>../miosix/arch/cortexM4_stm32f4/common/interfaces-impl</pElem>
             <pElem>../../../../../../../arm-miosix-eabi/lib/gcc/arm-miosix-eabi/4.7.3/include</pElem>
@@ -5824,6 +5847,41 @@
         <ccTool>
           <incDir>
             <pElem>../miosix/arch/cortexM4_stm32f4/common/interfaces-impl</pElem>
+          </incDir>
+        </ccTool>
+      </folder>
+      <folder path="0/miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412">
+        <ccTool>
+          <incDir>
+            <pElem>../miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/interfaces-impl</pElem>
+            <pElem>../miosix/kernel</pElem>
+            <pElem>../miosix/arch/common/CMSIS/Include</pElem>
+            <pElem>../miosix/arch/common/core</pElem>
+            <pElem>../miosix/arch/cortexM4_stm32f4/common/interfaces-impl</pElem>
+            <pElem>../../../../../../../arm-miosix-eabi/lib/gcc/arm-miosix-eabi/4.7.3/include</pElem>
+            <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/sys</pElem>
+            <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include</pElem>
+            <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3</pElem>
+            <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/bits</pElem>
+            <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/arm-miosix-eabi/thumb/cm4/hardfp/fpv4/bits</pElem>
+            <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/debug</pElem>
+            <pElem>../miosix/arch/common/CMSIS/Device/ST/STM32F4xx/Include</pElem>
+            <pElem>../miosix/interfaces</pElem>
+            <pElem>../miosix/kernel/scheduler/priority</pElem>
+            <pElem>../miosix/stdlib_integration</pElem>
+            <pElem>../miosix/kernel/scheduler</pElem>
+            <pElem>../miosix/filesystem</pElem>
+            <pElem>../miosix/filesystem/console</pElem>
+            <pElem>../miosix/arch/common/drivers</pElem>
+            <pElem>../miosix/arch/cortexM4_stm32f4/common</pElem>
+            <pElem>../miosix/config/arch/cortexM4_stm32f4/stm32f405rg_vesc412</pElem>
+            <pElem>../miosix/config</pElem>
+            <pElem>../miosix/kernel/scheduler/control</pElem>
+            <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/ext</pElem>
+            <pElem>../miosix</pElem>
+            <pElem>../miosix/arch/common</pElem>
+            <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/arm-miosix-eabi/thumb/cm4/hardfp/fpv4</pElem>
+            <pElem>../miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412</pElem>
           </incDir>
         </ccTool>
       </folder>
@@ -5979,7 +6037,7 @@
             <pElem>../miosix/arch/cortexM4_stm32f4/stm32f407vg_stm32f4discovery</pElem>
             <pElem>../miosix/config</pElem>
             <pElem>../miosix/kernel/scheduler/control</pElem>
-            <pElem>/opt/arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/arm-miosix-eabi/thumb/cm4/hardfp/fpv4/bits</pElem>
+            <pElem>opt/arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/arm-miosix-eabi/thumb/cm4/hardfp/fpv4/bits</pElem>
             <pElem>../miosix/arch/common/CMSIS/Include</pElem>
             <pElem>../miosix/arch/cortexM4_stm32f4/common/interfaces-impl</pElem>
             <pElem>../miosix</pElem>
@@ -6025,9 +6083,6 @@
       </folder>
       <folder path="0/miosix/kernel/scheduler/priority">
         <ccTool>
-          <incDir>
-            <pElem>opt/arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/arm-miosix-eabi/thumb/cm4/hardfp/fpv4/bits</pElem>
-          </incDir>
           <preprocessorList>
             <Elem>COMPILING_MIOSIX</Elem>
             <Elem>PARSING_FROM_IDE</Elem>

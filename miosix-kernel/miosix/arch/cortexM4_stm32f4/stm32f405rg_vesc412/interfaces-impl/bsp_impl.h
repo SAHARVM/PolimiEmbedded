@@ -33,6 +33,10 @@
 #ifndef BSP_IMPL_H
 #define BSP_IMPL_H
 
+#ifndef VESC412
+    #define VESC412
+#endif
+
 #include "config/miosix_settings.h"
 #include "interfaces/gpio.h"
 #include "drivers/stm32_hardware_rng.h"
@@ -48,14 +52,27 @@ namespace miosix {
  * \internal
  * used by the ledOn() and ledOff() implementation
  */
-typedef Gpio<GPIOC_BASE,15> _redLED;
+typedef Gpio<GPIOC_BASE,4> _greenLED;
 
-inline void ledOn()
+inline void greenLED_on()
+{
+    _greenLED::high();
+}
+
+inline void greenLED_off()
+{
+    _greenLED::low();
+}
+
+
+typedef Gpio<GPIOC_BASE,5> _redLED;
+
+inline void redLED_on()
 {
     _redLED::high();
 }
 
-inline void ledOff()
+inline void redLED_off()
 {
     _redLED::low();
 }
