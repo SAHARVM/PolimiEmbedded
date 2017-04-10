@@ -1,100 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="100">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
-    <logicalFolder name="miosix"
-                   displayName="miosix"
-                   projectFiles="true"
-                   root="../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix">
-      <logicalFolder name="arch" displayName="arch" projectFiles="true">
-        <logicalFolder name="common" displayName="common" projectFiles="true">
-          <logicalFolder name="CMSIS" displayName="CMSIS" projectFiles="true">
-            <logicalFolder name="Device" displayName="Device" projectFiles="true">
-              <logicalFolder name="ST" displayName="ST" projectFiles="true">
-                <logicalFolder name="STM32F4xx" displayName="STM32F4xx" projectFiles="true">
-                  <logicalFolder name="Include" displayName="Include" projectFiles="true">
-                    <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/common/CMSIS/Device/ST/STM32F4xx/Include/stm32f405xx.h</itemPath>
-                    <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/common/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h</itemPath>
-                  </logicalFolder>
-                </logicalFolder>
-              </logicalFolder>
-            </logicalFolder>
-            <logicalFolder name="Include" displayName="Include" projectFiles="true">
-              <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/common/CMSIS/Include/core_cm4.h</itemPath>
-              <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/common/CMSIS/Include/core_cmFunc.h</itemPath>
-              <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/common/CMSIS/Include/core_cmInstr.h</itemPath>
-            </logicalFolder>
-          </logicalFolder>
-          <logicalFolder name="core" displayName="core" projectFiles="true">
-            <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/common/core/atomic_ops_impl_cortexMx.h</itemPath>
-            <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/common/core/interrupts_cortexMx.h</itemPath>
-          </logicalFolder>
-          <logicalFolder name="drivers" displayName="drivers" projectFiles="true">
-            <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/common/drivers/sd_stm32f2_f4.h</itemPath>
-            <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/common/drivers/serial_stm32.h</itemPath>
-          </logicalFolder>
-        </logicalFolder>
-        <logicalFolder name="cortexM4_stm32f4"
-                       displayName="cortexM4_stm32f4"
-                       projectFiles="true">
-          <logicalFolder name="common" displayName="common" projectFiles="true">
-            <logicalFolder name="interfaces-impl"
-                           displayName="interfaces-impl"
-                           projectFiles="true">
-              <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/common/interfaces-impl/gpio_impl.h</itemPath>
-            </logicalFolder>
-            <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/common/arch_settings.h</itemPath>
-          </logicalFolder>
-        </logicalFolder>
-      </logicalFolder>
-      <logicalFolder name="config" displayName="config" projectFiles="true">
-        <logicalFolder name="arch" displayName="arch" projectFiles="true">
-          <logicalFolder name="cortexM4_stm32f4"
-                         displayName="cortexM4_stm32f4"
-                         projectFiles="true">
-            <logicalFolder name="stm32f405rg_vesc412"
-                           displayName="stm32f405rg_vesc412"
-                           projectFiles="true">
-              <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/config/arch/cortexM4_stm32f4/stm32f405rg_vesc412/board_settings.h</itemPath>
-            </logicalFolder>
-          </logicalFolder>
-        </logicalFolder>
-        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/config/miosix_settings.h</itemPath>
-      </logicalFolder>
-      <logicalFolder name="filesystem" displayName="filesystem" projectFiles="true">
-        <logicalFolder name="console" displayName="console" projectFiles="true">
-          <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/filesystem/console/console_device.h</itemPath>
-        </logicalFolder>
-        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/filesystem/file_access.h</itemPath>
-        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/filesystem/ioctl.h</itemPath>
-        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/filesystem/stringpart.h</itemPath>
-      </logicalFolder>
-      <logicalFolder name="interfaces" displayName="interfaces" projectFiles="true">
-        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/interfaces/bsp.h</itemPath>
-        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/interfaces/delays.h</itemPath>
-        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/interfaces/portability.h</itemPath>
-      </logicalFolder>
-      <logicalFolder name="kernel" displayName="kernel" projectFiles="true">
-        <logicalFolder name="scheduler" displayName="scheduler" projectFiles="true">
-          <logicalFolder name="control" displayName="control" projectFiles="true">
-            <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/kernel/scheduler/control/parameters.h</itemPath>
-          </logicalFolder>
-          <logicalFolder name="priority" displayName="priority" projectFiles="true">
-            <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/kernel/scheduler/priority/priority_scheduler_types.h</itemPath>
-          </logicalFolder>
-          <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/kernel/scheduler/sched_types.h</itemPath>
-        </logicalFolder>
-        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/kernel/intrusive.h</itemPath>
-        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/kernel/kernel.h</itemPath>
-        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/kernel/stage_2_boot.h</itemPath>
-        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/kernel/sync.h</itemPath>
-      </logicalFolder>
-      <logicalFolder name="stdlib_integration"
-                     displayName="stdlib_integration"
-                     projectFiles="true">
-        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/stdlib_integration/libc_integration.h</itemPath>
-        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/stdlib_integration/libstdcpp_integration.h</itemPath>
-      </logicalFolder>
-    </logicalFolder>
     <df root=".." name="0">
       <df name="miosix">
         <df name="arch">
@@ -375,6 +281,9 @@
               <in>arch_settings.h</in>
             </df>
             <df name="stm32f405rg_vesc412">
+              <df name="core">
+                <in>stage_1_boot.cpp</in>
+              </df>
               <df name="interfaces-impl">
                 <in>bsp.cpp</in>
               </df>
@@ -555,21 +464,6 @@
       </df>
       <in>main.cpp</in>
     </df>
-    <logicalFolder name="stm32f405rg_vesc412"
-                   displayName="stm32f405rg_vesc412"
-                   projectFiles="true"
-                   root="../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412">
-      <logicalFolder name="core" displayName="core" projectFiles="true">
-        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/core/stage_1_boot.cpp</itemPath>
-      </logicalFolder>
-      <logicalFolder name="interfaces-impl"
-                     displayName="interfaces-impl"
-                     projectFiles="true">
-        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/interfaces-impl/arch_registers_impl.h</itemPath>
-        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/interfaces-impl/bsp.cpp</itemPath>
-        <itemPath>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/interfaces-impl/bsp_impl.h</itemPath>
-      </logicalFolder>
-    </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
                    projectFiles="false"
@@ -4886,20 +4780,6 @@
           <preBuildCommand></preBuildCommand>
         </preBuild>
       </makefileType>
-      <item path="../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/core/stage_1_boot.cpp"
-            ex="false"
-            tool="1"
-            flavor2="8">
-        <ccTool flags="0">
-        </ccTool>
-      </item>
-      <item path="../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/interfaces-impl/bsp.cpp"
-            ex="false"
-            tool="1"
-            flavor2="8">
-        <ccTool flags="0">
-        </ccTool>
-      </item>
       <item path="../main.cpp" ex="false" tool="1" flavor2="8">
         <ccTool flags="0">
           <incDir>
@@ -5188,6 +5068,13 @@
             <pElem>../miosix</pElem>
             <pElem>../miosix/arch/common</pElem>
           </incDir>
+        </ccTool>
+      </item>
+      <item path="../miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/core/stage_1_boot.cpp"
+            ex="false"
+            tool="1"
+            flavor2="8">
+        <ccTool flags="0">
         </ccTool>
       </item>
       <item path="../miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/interfaces-impl/bsp.cpp"
@@ -5885,6 +5772,13 @@
           </incDir>
         </ccTool>
       </folder>
+      <folder path="0/miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/core">
+        <ccTool>
+          <incDir>
+            <pElem>../miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/core</pElem>
+          </incDir>
+        </ccTool>
+      </folder>
       <folder path="0/miosix/arch/cortexM4_stm32f4/stm32f407vg_stm32f4discovery/core">
         <ccTool>
           <incDir>
@@ -6115,54 +6009,6 @@
         <ccTool>
           <incDir>
             <pElem>../miosix/util</pElem>
-          </incDir>
-        </ccTool>
-      </folder>
-      <folder path="stm32f405rg_vesc412/core">
-        <ccTool>
-          <incDir>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/core</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/common/CMSIS/Include</pElem>
-            <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/common/CMSIS/Device/ST/STM32F4xx/Include</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/kernel</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/common/core</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix</pElem>
-          </incDir>
-        </ccTool>
-      </folder>
-      <folder path="stm32f405rg_vesc412/interfaces-impl">
-        <ccTool>
-          <incDir>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412/interfaces-impl</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/kernel</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/common/CMSIS/Include</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/common/core</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/common/interfaces-impl</pElem>
-            <pElem>../../../../../../../arm-miosix-eabi/lib/gcc/arm-miosix-eabi/4.7.3/include</pElem>
-            <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/sys</pElem>
-            <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include</pElem>
-            <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3</pElem>
-            <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/bits</pElem>
-            <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/arm-miosix-eabi/thumb/cm4/hardfp/fpv4/bits</pElem>
-            <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/debug</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/common/CMSIS/Device/ST/STM32F4xx/Include</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/interfaces</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/kernel/scheduler/priority</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/stdlib_integration</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/kernel/scheduler</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/filesystem</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/filesystem/console</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/common/drivers</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/common</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/config/arch/cortexM4_stm32f4/stm32f405rg_vesc412</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/config</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/kernel/scheduler/control</pElem>
-            <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/ext</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/common</pElem>
-            <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/arm-miosix-eabi/thumb/cm4/hardfp/fpv4</pElem>
-            <pElem>../../../Polimi_Embedded_Test/PolimiEmbedded_30_01_2017/miosix-kernel/miosix/arch/cortexM4_stm32f4/stm32f405rg_vesc412</pElem>
           </incDir>
         </ccTool>
       </folder>
