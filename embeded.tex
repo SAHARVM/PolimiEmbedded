@@ -333,7 +333,9 @@ The Nyko Kama wireless nunchuk can also be used to control the ESC. Note that no
 
 2.1 Control mode\newline
 Disabled or current control with or without reverse. If reverse is used, the Z button is used to toggle a direction change.\newline
-
+\newline
+\newline
+\newline
 2.2 Settings\newline
 Deadband: The span in the centre of the throttle that should be ignored.\newline
 RPM limits: Limit the electrical RPM of the motor. The start value is the point where the torque should start decreasing and the end value is the point where the output will be switched off. Setting them slightly apart will give a soft RPM limit. Setting them very high will disable the RPM limit.\newline
@@ -344,32 +346,65 @@ Multiple ESCs over CAN can be enabled to connect several VESCs over CAN bus. All
 \subsubsection{BLDC Motor Schematic}
 \label{BLDC Motor Schematic}
  In this part we can figure out how each part of the BLDC has been designed.\newline
-first of all we can see that totall BLDC system configuration
+first of all we can see that totall BLDC system configuration.\newline
+A brushless DC electric motor contains a synchronous motor and integrated power electronics that operate the motor from a direct current supply or an inverter/switching power supply which\newline produces an AC/bi-directional electric current to drive each phase of the motor via a closed loop controller. The controller times commutation (hence rpm) and creates current waveforms (hence torque). .\newline
+
 \begin {center}
 \includegraphics[scale=0.5]{fig8.png}\newline
 \end{center}
  power MOSFET Design
-
+\newline
+A power MOSFET is a specific type of metal oxide semiconductor field-effect transistor (MOSFET) designed to handle significant power levels.\newline
+Compared to the other power semiconductor devices, for example an insulated-gate bipolar transistor (IGBT) or a thyristor, its main advantages are high switching speed and good efficiency at low voltages. It shares with the IGBT an isolated gate that makes it easy to drive. They can be subject to low gain, sometimes to degree that the gate voltage needs to be higher than the voltage under control.\newline
+in this case we can see that there is 3 different Phases for the three different motors and they will be able to work between the High and Low values ,it means when ever the upper Mosfet turns ON the High (MAX) value will be appear in the High Output value while ,whenever the lower Mosfet turns ON it will send the Low limit (MIN) to the  low Output . 
 \begin {center}
-\includegraphics[scale=0.5]{fig9.png}\newline
+\includegraphics[scale=1.0]{fig9.png}\newline
 \end{center}
 
-NTC tempreature Sensor
+NTC tempreature Sensor\newline
+A thermistor is a type of negative coefficient resistor whose resistance is dependent on temperature, more so than in standard resistors. The word is a portmanteau of thermal and resistor. Thermistors are widely used as inrush current limiter, temperature sensors (Negative Temperature Coefficient or NTC type typically), self-resetting overcurrent protectors, and self-regulating heating elements (Positive Temperature Coefficient or PTC type typically).\newline
+\newline
+Thermistors are of two opposite fundamental types:\newline
+*With NTC, resistance decreases as temperature rises to protect against inrush overvoltage \newline conditions. Commonly installed in parallel as a current sink.\newline
+*With PTC, resistance increases as temperature rises to protect against overcurrent conditions. Commonly installed in series as a resettable fuse.\newline
 \begin {center}
-\includegraphics[scale=0.5]{fig10.png}\newline
+\includegraphics[scale=1.0]{fig10.png}\newline
 \end{center}
 
-CAN BUS transciever
+CAN BUS transciever\newline
+A Controller Area Network (CAN bus) is a vehicle bus standard designed to allow microcontrollers and devices to communicate with each other in applications without a host computer. It is a message-based protocol, designed originally for multiplex electrical wiring within automobiles, but is also used in many other contexts.\newline
+The CAN transceiver has two tasks:\newline
+- Receiving: it adapts signal levels from the bus, to levels that the CAN Controller expects and has protective circuitry that protect the CAN Controller\newline
+- Sending: it converts the transmit-bit signal received from the CAN Controller into a signal that is sent onto the bus\newline
 \begin {center}
-\includegraphics[scale=0.5]{fig11.png}\newline
+\includegraphics[scale=1.0]{fig11.png}\newline
 \end{center}
 
- The filters
+ The Filter:\newline
+Electronic filters are circuits which perform signal processing functions, specifically to remove unwanted frequency components from the signal, to enhance wanted ones, or both. Electronic filters can be:\newline
+ a) passive or active\newline
+ b)analog or digital \newline
+ c)high-pass, low-pass, band-pass, band-stop (band-rejection; notch), or all-pass.\newline
+ d)discrete-time (sampled) or continuous-time\newline
+ e)linear or non-linear\newline
+ f)infinite impulse response (IIR type) or finite impulse response (FIR type)\newline
+The most common types of electronic filters are linear filters, regardless of other aspects of their design. See the article on linear filters for details on their design and analysis.\newline
+in this project we were use RC filter as a main filter of the circuit which it will be act as a filter that passes signals with a frequency lower than a certain cutoff frequency and attenuates signals with frequencies higher than the cutoff frequency. The exact frequency response of the filter depends on the filter design. The filter is sometimes called a high-cut filter, or treble cut filter in audio applications. A low-pass filter is the complement of a high-pass filter.\newline
+In an electronic low-pass RC filter for voltage signals, high frequencies in the input signal are attenuated, but the filter has little attenuation below the cutoff frequency determined by its RC time constant. For current signals, a similar circuit, using a resistor and capacitor in parallel, works in a similar manner.
+Electronic low-pass filters are used on inputs to subwoofers and other types of loudspeakers, to block high pitches that they can't efficiently reproduce. Radio transmitters use low-pass filters to block harmonic emissions that might interfere with other communications. The tone knob on many electric guitars is a low-pass filter used to reduce the amount of treble in the sound. An integrator is another time constant low-pass filter.\newline
+
 \begin {center}
-\includegraphics[scale=0.5]{fig12.png}\newline
+\includegraphics[scale=1.0]{fig12.png}\newline
 \end{center}
 
-Mcu(Microcontroller Unit)
+
+Mcu(Microcontroller Unit)\newline
+A microcontroller (or MCU for microcontroller unit) is a small computer on a single integrated circuit. In modern terminology, it is a system on a chip or SoC. A microcontroller contains one or more CPUs (processor cores) along with memory and programmable input/output peripherals. Program memory in the form of Ferroelectric RAM, NOR flash or OTP ROM is also often included on chip, as well as a small amount of RAM. Microcontrollers are designed for embedded applications, in contrast to the microprocessors used in personal computers or other general purpose applications consisting of various discrete chips.
+
+Microcontrollers are used in automatically controlled products and devices, such as automobile engine control systems, implantable medical devices, remote controls, office machines, appliances, power tools, toys and other embedded systems. By reducing the size and cost compared to a design that uses a separate microprocessor, memory, and input/output devices, microcontrollers make it economical to digitally control even more devices and processes. Mixed signal microcontrollers are common, integrating analog components needed to control non-digital electronic systems.
+
+Some microcontrollers may use four-bit words and operate at frequencies as low as 4 kHz, for low power consumption (single-digit milliwatts or microwatts). They will generally have the ability to retain functionality while waiting for an event such as a button press or other interrupt; power consumption while sleeping (CPU clock and most peripherals off) may be just nanowatts, making many of them well suited for long lasting battery applications. Other microcontrollers may serve performance-critical roles, where they may need to act more like a digital signal processor (DSP), with higher clock speeds and power consumption.
+
 \begin {center}
 \includegraphics[scale=0.5]{fig13.png}\newline
 \end{center}
