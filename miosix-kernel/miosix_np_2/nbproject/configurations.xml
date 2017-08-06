@@ -77,6 +77,8 @@
             <df name="drivers">
               <in>dcc.cpp</in>
               <in>dcc.h</in>
+              <in>pmsm_drive_stm32.cpp</in>
+              <in>pmsm_drive_stm32.h</in>
               <in>sd_lpc2000.cpp</in>
               <in>sd_lpc2000.h</in>
               <in>sd_stm32f1.cpp</in>
@@ -602,6 +604,16 @@
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/dcc.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -1334,6 +1346,16 @@
             tool="1"
             flavor2="0">
       </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../miosix/arch/common/drivers/sd_lpc2000.cpp"
             ex="false"
             tool="1"
@@ -1834,6 +1856,16 @@
       <item path="../miosix/arch/common/core/interrupts_cortexMx.cpp"
             ex="false"
             tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/sd_stm32f1.cpp"
@@ -2455,6 +2487,16 @@
       <item path="../miosix/arch/common/core/interrupts_cortexMx.cpp"
             ex="false"
             tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/sd_stm32f1.cpp"
@@ -3080,6 +3122,16 @@
             tool="1"
             flavor2="0">
       </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../miosix/arch/common/drivers/serial_stm32.cpp"
             ex="false"
             tool="1"
@@ -3551,6 +3603,16 @@
       <item path="../miosix/arch/common/core/interrupts_cortexMx.cpp"
             ex="false"
             tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/sd_stm32f1.cpp"
@@ -4175,6 +4237,16 @@
       <item path="../miosix/arch/common/core/interrupts_cortexMx.cpp"
             ex="false"
             tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/sd_stm32f1.cpp"
@@ -4844,6 +4916,16 @@
             <pElem>../miosix/arch/common/CMSIS/Include</pElem>
             <pElem>../miosix</pElem>
             <pElem>../../../../../../../arm-miosix-eabi/arm-miosix-eabi/include/c++/4.7.3/arm-miosix-eabi/thumb/cm4/hardfp/fpv4</pElem>
+          </incDir>
+        </ccTool>
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="8">
+        <ccTool flags="0">
+          <incDir>
+            <pElem>../miosix/arch/common/drivers</pElem>
           </incDir>
         </ccTool>
       </item>
@@ -6074,6 +6156,16 @@
             tool="1"
             flavor2="0">
       </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../miosix/arch/common/drivers/sd_stm32f2_f4.cpp"
             ex="false"
             tool="1"
@@ -6706,6 +6798,16 @@
       <item path="../miosix/arch/common/core/interrupts_cortexMx.cpp"
             ex="false"
             tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/sd_stm32f2_f4.cpp"
@@ -7342,6 +7444,16 @@
             tool="1"
             flavor2="0">
       </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../miosix/arch/common/drivers/serial_stm32.cpp"
             ex="false"
             tool="1"
@@ -7813,6 +7925,16 @@
       <item path="../miosix/arch/common/core/interrupts_cortexMx.cpp"
             ex="false"
             tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/serial_stm32.cpp"
@@ -8301,6 +8423,16 @@
       <item path="../miosix/arch/common/core/interrupts_cortexMx.cpp"
             ex="false"
             tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/sd_stm32f2_f4.cpp"
@@ -8938,6 +9070,16 @@
             tool="1"
             flavor2="0">
       </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../miosix/arch/common/drivers/stm32f2_f4_i2c.cpp"
             ex="false"
             tool="1"
@@ -9430,6 +9572,16 @@
       <item path="../miosix/arch/common/core/interrupts_cortexMx.cpp"
             ex="false"
             tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/sd_stm32f2_f4.cpp"
@@ -10102,6 +10254,16 @@
             tool="1"
             flavor2="9">
       </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../miosix/arch/common/drivers/serial_stm32.cpp"
             ex="false"
             tool="1"
@@ -10594,6 +10756,16 @@
             ex="false"
             tool="1"
             flavor2="9">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/serial_stm32.cpp"
             ex="false"
@@ -11092,6 +11264,16 @@
             ex="false"
             tool="1"
             flavor2="9">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/sd_stm32f2_f4.cpp"
             ex="false"
@@ -11807,6 +11989,16 @@
             tool="1"
             flavor2="0">
       </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../miosix/arch/common/drivers/serial_efm32.cpp"
             ex="false"
             tool="1"
@@ -12436,6 +12628,16 @@
       <item path="../miosix/arch/common/core/interrupts_cortexMx.cpp"
             ex="false"
             tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
             flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/sd_stm32f2_f4.cpp"
@@ -13257,6 +13459,16 @@
             ex="false"
             tool="1"
             flavor2="8">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../miosix/arch/common/drivers/sd_stm32f2_f4.cpp"
             ex="false"

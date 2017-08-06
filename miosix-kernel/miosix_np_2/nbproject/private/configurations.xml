@@ -122,7 +122,6 @@
                       <in>stm32f401xc.h</in>
                       <in>stm32f401xe.h</in>
                       <in>stm32f405xx.h</in>
-                      <in>stm32f407xx.h</in>
                       <in>stm32f411xe.h</in>
                       <in>stm32f415xx.h</in>
                       <in>stm32f417xx.h</in>
@@ -199,6 +198,8 @@
             <df name="drivers">
               <in>dcc.cpp</in>
               <in>dcc.h</in>
+              <in>pmsm_drive_stm32.cpp</in>
+              <in>pmsm_drive_stm32.h</in>
               <in>sd_lpc2000.cpp</in>
               <in>sd_lpc2000.h</in>
               <in>sd_stm32f1.cpp</in>

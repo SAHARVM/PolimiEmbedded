@@ -1,43 +1,45 @@
 
 #define VESC412
 
-//#include <cstdio>
 #include <stdio.h>
-//#include "miosix.h"
-#include "drivers/servo_stm32.h"
+#include "drivers/pmsm_drive_stm32.h"
 
 using namespace std;
 using namespace miosix;
 
-int main()
-{
-#if 0
-    while(1)
-    {
-        greenLED_on();
-        sleep(1);
-        greenLED_off();
-        sleep(1);
+int main() {
+
+
+    // TODO: Find out how to write in the terminal
+    
+    pmsmPWMsignal& driveSignals = pmsmPWMsignal::instance();
+    driveSignals.setFrequency(1000);
+    driveSignals.enable();
+    driveSignals.start();
+    driveSignals.setWidth(0);
+
+    while (1) {
+
+        for (float i = 0; i <= 1; i += .1) {
+            greenLED_on();
+            redLED_off();
+            sleep(1);
+            driveSignals.waitForCycleBegin();
+            driveSignals.setWidth(i);
+            greenLED_off();
+            redLED_on();
+            sleep(1);
+        }
+        for (float i = 1; i >= 0; i -= .1) {
+            greenLED_on();
+            redLED_off();
+            sleep(1);
+            driveSignals.waitForCycleBegin();
+            driveSignals.setWidth(i);
+            greenLED_off();
+            redLED_on();
+            sleep(1);
+        }
     }
-#endif
-    
-#if 1
-    
-    SynchronizedServo& servo=SynchronizedServo::instance();
-    servo.enable(4); //Enable channel 4 (connect servo to PB5)
-    servo.start();
-    
-    for(int i=0;i<4;i++) servo.enable(i);
-    servo.start();
-    for(;;)
-    {
-        printf("id (0-3), val (0.0-1.0)?\n");
-        int id;
-        float val;
-        scanf("%d %f",&id,&val);
-        servo.setPosition(id,val);
-    }
-#endif
-    
-  return 0;
+    return 0;
 }

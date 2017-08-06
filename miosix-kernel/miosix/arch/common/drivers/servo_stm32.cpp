@@ -34,11 +34,10 @@
 using namespace std;
 using namespace miosix;
 
-typedef Gpio<GPIOB_BASE,6> servo1out;   // TIM4_CH1
-typedef Gpio<GPIOB_BASE,7> servo2out;   // TIM4_CH2 
-typedef Gpio<GPIOB_BASE,8> servo3out;   // TIM4_CH3
-typedef Gpio<GPIOB_BASE,9> servo4out;   // TIM4_CH4
-typedef Gpio<GPIOB_BASE,5> servo5out;   // TIM3_CH2 VESC BOARD - Step 1
+typedef Gpio<GPIOB_BASE,6> servo1out;
+typedef Gpio<GPIOB_BASE,7> servo2out;
+typedef Gpio<GPIOB_BASE,8> servo3out;
+typedef Gpio<GPIOB_BASE,9> servo4out;
 static Thread *waiting=0;
 
 /**
@@ -55,35 +54,12 @@ void __attribute__((used)) tim4impl()
 }
 
 /**
- * Timer 3 interrupt handler actual implementation - Step 2
- */
-void __attribute__((used)) tim3impl()
-{
-    TIM3->SR=0; //Clear interrupt flag
-    if(waiting==0) return;
-    waiting->IRQwakeup();
-    if(waiting->IRQgetPriority()>Thread::IRQgetCurrentThread()->IRQgetPriority())
-        Scheduler::IRQfindNextThread();
-    waiting=0;
-}
-
-/**
  * Timer 4 interrupt handler
  */
 void __attribute__((naked)) TIM4_IRQHandler()
 {
     saveContext();
     asm volatile("bl _Z8tim4implv");
-    restoreContext();
-}
-
-/**
- * Timer 3 interrupt handler - Step 3
- */
-void __attribute__((naked)) TIM3_IRQHandler()
-{
-    saveContext();
-    asm volatile("bl _Z8tim3implv");
     restoreContext();
 }
 
@@ -149,14 +125,6 @@ void SynchronizedServo::enable(int channel)
                 #endif //_ARCH_CORTEXM3_STM32
                 servo4out::mode(Mode::ALTERNATE);
                 break;
-            case 4:     // Step 4
-                TIM3->CCMR1 |= TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2PE;
-                TIM3->CCER |= TIM_CCER_CC2E;
-                #ifndef _ARCH_CORTEXM3_STM32 //Only stm32f2 and stm32f4 have it
-                servo4out::alternateFunction(2);
-                #endif //_ARCH_CORTEXM3_STM32
-                servo4out::mode(Mode::ALTERNATE);
-                break;
         }
     }
 }
@@ -188,10 +156,6 @@ void SynchronizedServo::disable(int channel)
                 servo4out::mode(Mode::INPUT);
                 TIM4->CCER &= ~TIM_CCER_CC4E;
                 break;
-            case 4:     // Step 5
-                servo5out::mode(Mode::INPUT);
-                TIM3->CCER &= ~TIM_CCER_CC2E;
-                break;
         }
     }
 }
@@ -216,9 +180,6 @@ void SynchronizedServo::setPosition(int channel, float value)
         case 3:
             TIM4->CCR4=a*value+b;
             break;
-        case 4:     // Step 6
-            TIM3->CCR2=a*value+b;
-            break;
     }
 }
 
@@ -234,8 +195,6 @@ float SynchronizedServo::getPosition(int channel)
             return TIM4->CCR3==0 ? NAN : TIM4->CCR3/a-b;
         case 3:
             return TIM4->CCR4==0 ? NAN : TIM4->CCR4/a-b;
-        case 4:     // Step 7
-            return TIM3->CCR2==0 ? NAN : TIM3->CCR2/a-b;
         default:
             return NAN;
     }
@@ -252,11 +211,6 @@ void SynchronizedServo::start()
     TIM4->CNT=0;
     TIM4->EGR=TIM_EGR_UG;
     TIM4->CR1=TIM_CR1_CEN;
-    
-    // Step 8
-    TIM3->CNT=0;
-    TIM3->EGR=TIM_EGR_UG;
-    TIM3->CR1=TIM_CR1_CEN;
 }
 
 void SynchronizedServo::stop()
@@ -273,7 +227,6 @@ void SynchronizedServo::stop()
     TIM4->CCR2=0;
     TIM4->CCR3=0;
     TIM4->CCR4=0;
-    TIM3->CCR2=0;   // Step 9
     {
         FastInterruptDisableLock dLock;
         // Wakeup an eventual thread waiting on waitForCycleBegin()
@@ -281,7 +234,6 @@ void SynchronizedServo::stop()
         IRQwaitForTimerOverflow(dLock);
     }
     TIM4->CR1=0;
-    TIM3->CR1=0;    // Step 10
 }
 
 bool SynchronizedServo::waitForCycleBegin()
@@ -301,15 +253,13 @@ void SynchronizedServo::setFrequency(unsigned int frequency)
     if(status!=STOPPED) return; // If timer enabled ignore the call
     
     TIM4->PSC=divideRoundToNearest(getPrescalerInputFrequency(),frequency*65536)-1;
-    TIM3->PSC=divideRoundToNearest(getPrescalerInputFrequency(),frequency*65536)-1; // Step 11
     precomputeCoefficients();
 }
 
 float SynchronizedServo::getFrequency() const
 {
     float prescalerFreq=getPrescalerInputFrequency();
-    //return prescalerFreq/((TIM4->PSC+1)*65536);
-    return prescalerFreq/((TIM3->PSC+1)*65536);     // Step 12
+    return prescalerFreq/((TIM4->PSC+1)*65536);
 }
 
 void SynchronizedServo::setMinPulseWidth(float minPulse)
@@ -342,22 +292,15 @@ SynchronizedServo::SynchronizedServo() : status(STOPPED)
     
     // Configure timer
     TIM4->CR1=0;
-    TIM3->CR1=0;        // Step 13
     TIM4->ARR=0xffff;
     TIM4->CCR1=0;
     TIM4->CCR2=0;
     TIM4->CCR3=0;
     TIM4->CCR4=0;
-    TIM3->ARR=0xffff;
-    TIM3->CCR2=0;
-    
     // Configure interrupt on timer overflow
     TIM4->DIER=TIM_DIER_UIE;
     NVIC_SetPriority(TIM4_IRQn,13); //Low priority for timer IRQ
     NVIC_EnableIRQ(TIM4_IRQn);
-    TIM3->DIER=TIM_DIER_UIE;    // Step 14
-    NVIC_SetPriority(TIM3_IRQn,13); //Low priority for timer IRQ
-    NVIC_EnableIRQ(TIM3_IRQn);
     // Set default parameters
     setFrequency(50);
     setMinPulseWidth(1000);

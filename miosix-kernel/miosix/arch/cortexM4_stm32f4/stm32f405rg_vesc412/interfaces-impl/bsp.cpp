@@ -49,8 +49,6 @@
 
 namespace miosix {
 
-//typedef Gpio<GPIOD_BASE,2>  cs43l22reset;
-
 //
 // Initialization
 //
