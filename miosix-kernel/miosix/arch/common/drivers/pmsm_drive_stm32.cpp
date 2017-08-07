@@ -21,6 +21,13 @@ using namespace std;
 using namespace miosix;
 
 typedef Gpio<GPIOB_BASE, 5> pwmSignal0; // TIM3_CH2 VESC BOARD
+
+typedef Gpio<GPIOB_BASE, 6> hallSensor1;
+typedef Gpio<GPIOB_BASE, 7> hallSensor2;
+typedef Gpio<GPIOC_BASE, 11> hallSensor3;
+
+
+
 static Thread *waiting = 0;
 
 /**
@@ -44,18 +51,39 @@ void __attribute__ ((naked)) TIM3_IRQHandler() {
     restoreContext();
 }
 
+/**
+ * Timer 2 interrupt handler actual implementation
+ */
+void __attribute__ ((used)) tim2impl() {
+    TIM2->SR = 0; // Clear interrupt flags
+    if (waiting == 0) return;
+    waiting->IRQwakeup();
+    if (waiting->IRQgetPriority() > Thread::IRQgetCurrentThread()->IRQgetPriority())
+        Scheduler::IRQfindNextThread();
+    waiting = 0;
+}
+
+/**
+ * Timer 2 interrupt handler
+ */
+void __attribute__ ((naked)) TIM2_IRQHandler() {
+    saveContext();
+    asm volatile("bl _Z8tim2implv");
+    restoreContext();
+}
+
 namespace miosix {
 
     //
-    // class pmsmPWMsignal
+    // class PMSMdriver
     //
 
-    pmsmPWMsignal& pmsmPWMsignal::instance() {
-        static pmsmPWMsignal singleton;
+    PMSMdriver& PMSMdriver::instance() {
+        static PMSMdriver singleton;
         return singleton;
     }
 
-    pmsmPWMsignal::pmsmPWMsignal() : status(STOPPED) {
+    PMSMdriver::PMSMdriver() : status(STOPPED) {
         {
             FastInterruptDisableLock dLock;
             // The RCC register should be written with interrupts disabled to
@@ -72,12 +100,13 @@ namespace miosix {
         TIM3->DIER = TIM_DIER_UIE;
         NVIC_SetPriority(TIM3_IRQn, 14); //Low priority for timer IRQ
         NVIC_EnableIRQ(TIM3_IRQn);
+        setupHallSensors();
     }
-    
-    void pmsmPWMsignal::setFrequency(unsigned int PWM_frequency) {
+
+    void PMSMdriver::setFrequency(unsigned int PWM_frequency) {
         Lock<FastMutex> l(mutex);
         if (status != STOPPED) return; // If timer enabled ignore the call
-        uint32_t TIMER_Frequency = SystemCoreClock/2;
+        uint32_t TIMER_Frequency = SystemCoreClock / 2;
         uint32_t COUNTER_Frequency = PWM_RESOLUTION * PWM_frequency;
         uint32_t PSC_Value = (TIMER_Frequency / COUNTER_Frequency) - 1;
         uint16_t ARR_Value = PWM_RESOLUTION - 1;
@@ -85,7 +114,7 @@ namespace miosix {
         TIM3->ARR = ARR_Value;
     }
 
-    void pmsmPWMsignal::enable() {
+    void PMSMdriver::enable() {
         Lock<FastMutex> l(mutex);
         if (status != STOPPED) return; // If timer enabled ignore the call
         {
@@ -102,7 +131,7 @@ namespace miosix {
         }
     }
 
-    void pmsmPWMsignal::disable() {
+    void PMSMdriver::disable() {
         Lock<FastMutex> l(mutex);
         if (status != STOPPED) return; // If timer enabled ignore the call
         {
@@ -115,7 +144,7 @@ namespace miosix {
         }
     }
 
-    void pmsmPWMsignal::setWidth(float pulseWidth) {
+    void PMSMdriver::setWidth(float pulseWidth) {
         Lock<FastMutex> l(mutex);
         if (status != STARTED) return; // If timer disabled ignore the call
         //switch (channel) {
@@ -125,7 +154,7 @@ namespace miosix {
         //}
     }
 
-    void pmsmPWMsignal::start() {
+    void PMSMdriver::start() {
         Lock<FastMutex> l(mutex);
         if (status != STOPPED) return; // If timer enabled ignore the call
 
@@ -137,7 +166,7 @@ namespace miosix {
         TIM3->CR1 = TIM_CR1_CEN;
     }
 
-    void pmsmPWMsignal::stop() {
+    void PMSMdriver::stop() {
         Lock<FastMutex> l(mutex);
         if (status != STARTED) return; // If timer disabled ignore the call
         status = STOPPED;
@@ -151,7 +180,7 @@ namespace miosix {
         TIM3->CR1 = 0;
     }
 
-    bool pmsmPWMsignal::waitForCycleBegin() {
+    bool PMSMdriver::waitForCycleBegin() {
         // No need to lock the mutex because disabling interrupts is enough to avoid
         // race conditions. Also, locking the mutex here would prevent other threads
         // from calling other member functions of this class
@@ -161,7 +190,18 @@ namespace miosix {
         return status != STARTED;
     }
 
-    void pmsmPWMsignal::IRQwaitForTimerOverflow(FastInterruptDisableLock& dLock) {
+    void PMSMdriver::setupHallSensors() {
+        hallSensor1::mode(Mode::INPUT);
+        hallSensor2::mode(Mode::INPUT);
+        hallSensor3::mode(Mode::INPUT);
+    }
+    
+    char PMSMdriver::getHallEffectSensorsValue(){
+        hallEffectSensorsPosition = (hallSensor1::value() << 0) | (hallSensor2::value() << 1) | (hallSensor3::value() << 2);
+        return hallEffectSensorsPosition;
+    }
+
+    void PMSMdriver::IRQwaitForTimerOverflow(FastInterruptDisableLock& dLock) {
         waiting = Thread::IRQgetCurrentThread();
         do {
             Thread::IRQwait();

@@ -29,7 +29,7 @@ namespace miosix {
      * This class can be safely accessed by multiple threads, except the
      * waitForCycleBegin() member function.
      */
-    class pmsmPWMsignal {
+    class PMSMdriver {
     public:
         /**
          * \return an instance of the SynchronizedServo class (singleton)
@@ -37,7 +37,7 @@ namespace miosix {
          * enable at least one channel call start() and setPosition() before the
          * servo driving waveforms will be generated.
          */
-        static pmsmPWMsignal& instance();
+        static PMSMdriver& instance();
 
         /**
          * Enable a channel. Can only be called with the outputs stopped. Even if
@@ -88,6 +88,18 @@ namespace miosix {
          * Must be between 10 and 100Hz
          */
         void setFrequency(unsigned int frequency);
+        
+        /**
+         * 
+         */
+        void setupHallSensors();
+        
+        /**
+         *  TODO: write something
+         * @return Hall effect sensors A, B and C value in the 3 first bits of a byte
+         * i.e. 0b 0 0 0 0  0 hC hB hA
+         */
+        char getHallEffectSensorsValue();
 
         /*
          * Set the absolute pulse width of the PWM signal
@@ -95,13 +107,13 @@ namespace miosix {
         void setWidth(float pulseWidth);
 
     private:
-        pmsmPWMsignal(const pmsmPWMsignal&);
-        pmsmPWMsignal& operator=(const pmsmPWMsignal&);
+        PMSMdriver(const PMSMdriver&);
+        PMSMdriver& operator=(const PMSMdriver&);
 
         /**
          * Constructor
          */
-        pmsmPWMsignal();
+        PMSMdriver();
 
         /**
          * Wait until the timer overflows from 0xffff to 0. Can only be called with
@@ -109,10 +121,12 @@ namespace miosix {
          */
         static void IRQwaitForTimerOverflow(FastInterruptDisableLock& dLock);
 
-        float minWidth, maxWidth; ///< Minimum and maximum pulse widths
-        float a, b, c; ///< Precomputed coefficients
+        //float minWidth, maxWidth; ///< Minimum and maximum pulse widths
+        //float a, b, c; ///< Precomputed coefficients
         FastMutex mutex; ///< Mutex to protect from concurrent access
 
+        char hallEffectSensorsPosition = 0;
+        
         enum {
             STOPPED, ///< Timer is stopped
             STARTED ///< Timer is started

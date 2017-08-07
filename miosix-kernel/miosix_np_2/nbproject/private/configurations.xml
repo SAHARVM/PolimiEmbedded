@@ -122,6 +122,7 @@
                       <in>stm32f401xc.h</in>
                       <in>stm32f401xe.h</in>
                       <in>stm32f405xx.h</in>
+                      <in>stm32f407xx.h</in>
                       <in>stm32f411xe.h</in>
                       <in>stm32f415xx.h</in>
                       <in>stm32f417xx.h</in>
