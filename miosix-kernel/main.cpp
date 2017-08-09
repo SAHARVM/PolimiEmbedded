@@ -16,24 +16,34 @@ ConditionVariable cond, ack;
 char c = 0;
 
 void thread_PMSM_PWM(void *argv) {
-    //Run every 10 milliseconds
-    const int period = static_cast<int> (TICK_FREQ * 0.001);
+    //Run every 100 milliseconds
+    const int period = static_cast<int> (TICK_FREQ * 0.1);
     long long tick = getTick();
-
-    PMSMdriver& driveSignals = PMSMdriver::instance();
-    driveSignals.setFrequency(10000);
-    driveSignals.enable();
-    driveSignals.start();
-    driveSignals.enableDriver();
-
     float dutyCycle = .1;
+    char ramp = 0; 
     
+    PMSMdriver::instance();
+    PMSMdriver::setFrequency(20000);
+    PMSMdriver::enable();
+    PMSMdriver::start();
+    PMSMdriver::enableDriver();
+
     while (1) {
-        
-        driveSignals.trapezoidalDrive(dutyCycle, CW);
+        if (ramp == 0){
+            dutyCycle += .01;
+            if (dutyCycle >= 1){
+                sleep(5);
+                ramp = 1;
+            }
+        } else if (ramp == 1){
+            dutyCycle -= .01;
+            if (dutyCycle <= .1){
+                ramp = 0;
+            }
+        }
+        PMSMdriver::changeDutyCycle(dutyCycle);
         tick += period;
         Thread::sleepUntil(tick);
-     
     }
 }
 
@@ -53,7 +63,7 @@ void thread_1s_tick(void *argv) {
 
 int main() {
 
-    sleep(5);   // Don't delete this, it's useful to avoid current peaks when we need to reprogram the system
+    sleep(5);   // Don't delete this yet, it's useful to avoid current peaks when we need to reprogram the system
     
     Thread *thread1;
     Thread *thread2;

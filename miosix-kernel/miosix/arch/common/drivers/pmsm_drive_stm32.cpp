@@ -18,7 +18,7 @@
 using namespace std;
 using namespace miosix;
 
-typedef Gpio<GPIOB_BASE, 5> pwmSignal0; // TIM3_CH2, this output can drive a servomotor but it's now used for testing
+typedef Gpio<GPIOB_BASE, 5> pwmSignal0; // TIM3_CH2, this output can drive a servomotor, must now be allocated in another file maybe
 
 typedef Gpio<GPIOA_BASE, 8> pwmSignalH3; // TIM1_CH1
 typedef Gpio<GPIOA_BASE, 9> pwmSignalH2; // TIM1_CH2
@@ -42,6 +42,12 @@ typedef Gpio<GPIOC_BASE, 10> enableGate;
 typedef Gpio<GPIOC_BASE, 12> faultPin; // TODO: implement monitor and handler for this signal
 
 static Thread *waiting = 0;
+
+char hallEffectSensors_newPosition = 0;
+char hallEffectSensors_oldPosition = 0;
+
+float vDutyCycle = 0;
+bool vDirection = 0; // 0 is CW, 1 is CCW  
 
 /**
  * Timer 1 interrupt handler actual implementation
@@ -73,11 +79,10 @@ void __attribute__ ((naked)) TIM1_CC_IRQHandler() {
 
 void __attribute__ ((used)) tim2impl() {
     /* The code of the interrupt handler goes from here...*/
-    // TODO: Setup a timer at a kHz frequency to read and drive the motor
-    // TODO: Find out how to call HERE the PMSM drive function
+    
     TIM2->SR = 0; // Clear interrupt flags
-    //updateHallEffectSensorsValue();
-    //pmsmDrive();
+    PMSMdriver::trapezoidalDrive();
+   
     /*... to here*/
 
     if (waiting == 0) return;
@@ -129,13 +134,15 @@ namespace miosix {
         return singleton;
     }
 
-    PMSMdriver::PMSMdriver() : status(STOPPED) {
+    //PMSMdriver::PMSMdriver()/* : status(STOPPED) */{
+    PMSMdriver::PMSMdriver(){
         {
             FastInterruptDisableLock dLock;
             // The RCC register should be written with interrupts disabled to
             // prevent race conditions with other threads.
-            RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
-            RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
+            RCC->APB1ENR |= RCC_APB1ENR_TIM3EN; // Servo motor drive
+            RCC->APB2ENR |= RCC_APB2ENR_TIM1EN; // PMSM drive
+            RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; // Control PMSM
             RCC_SYNC();
         }
 
@@ -151,7 +158,7 @@ namespace miosix {
 
         // Configure interrupt on timer 3 overflow
         TIM3->DIER = TIM_DIER_UIE;
-        NVIC_SetPriority(TIM3_IRQn, 15); //Low priority for timer IRQ
+        NVIC_SetPriority(TIM3_IRQn, 16); //Low priority for timer IRQ
         NVIC_EnableIRQ(TIM3_IRQn);
 
         // Configure interrupt on timer 1 overflow
@@ -164,11 +171,13 @@ namespace miosix {
         enableGate::mode(Mode::OUTPUT);
         faultPin::mode(Mode::INPUT); // Doesn't have a handler yet
         disableDriver(); // Must be enabled later to drive the power MOS gates
+        setupControlTimer(15000);
+        
     }
 
     void PMSMdriver::setFrequency(unsigned int PWM_frequency) {
-        Lock<FastMutex> l(mutex);
-        if (status != STOPPED) return; // If timer enabled ignore the call
+        //Lock<FastMutex> l(mutex);
+        //if (status != STOPPED) return; // If timer enabled ignore the call
 
         uint32_t TIMER_Frequency = SystemCoreClock / 2; // From the data sheet
         uint32_t COUNTER_Frequency = PWM_RESOLUTION * PWM_frequency; // How many steps inside a Period
@@ -179,7 +188,7 @@ namespace miosix {
         TIM3->ARR = ARR_Value;
 
         /*In case that timers have different clock sources, use different configurations*/
-        TIMER_Frequency = SystemCoreClock / 2; // From the data sheet
+        TIMER_Frequency = SystemCoreClock; // From the data sheet
         COUNTER_Frequency = PWM_RESOLUTION * PWM_frequency; // How many steps inside a Period
         PSC_Value = (TIMER_Frequency / COUNTER_Frequency) - 1; // Pre-scaler
         ARR_Value = PWM_RESOLUTION - 1; // Top value to count to
@@ -189,8 +198,8 @@ namespace miosix {
     }
 
     void PMSMdriver::enable() {
-        Lock<FastMutex> l(mutex);
-        if (status != STOPPED) return; // If timer enabled ignore the call
+        //Lock<FastMutex> l(mutex);
+        //if (status != STOPPED) return; // If timer enabled ignore the call
         {
             FastInterruptDisableLock dLock;
             // Calling the mode() function on a GPIO is subject to race conditions
@@ -238,13 +247,12 @@ namespace miosix {
 #elif SINUSOIDAL_DRIVE
             /*TODO*/
 #endif
-            enableDriver();
         }
     }
 
     void PMSMdriver::disable() {
-        Lock<FastMutex> l(mutex);
-        if (status != STOPPED) return; // If timer enabled ignore the call
+        //Lock<FastMutex> l(mutex);
+        //if (status != STOPPED) return; // If timer enabled ignore the call
         {
             FastInterruptDisableLock dLock;
             // Calling the mode() function on a GPIO is subject to race conditions
@@ -272,12 +280,12 @@ namespace miosix {
     }
 
     void PMSMdriver::start() {
-        Lock<FastMutex> l(mutex);
-        if (status != STOPPED) return; // If timer enabled ignore the call
+        //Lock<FastMutex> l(mutex);
+        //if (status != STOPPED) return; // If timer enabled ignore the call
 
         // While status is starting neither member function callable with timer
         // started nor stopped are allowed
-        status = STARTED;
+        //status = STARTED;
         TIM3->CNT = 0;
         TIM3->EGR = TIM_EGR_UG;
         TIM3->CR1 = TIM_CR1_CEN;
@@ -289,9 +297,9 @@ namespace miosix {
     }
 
     void PMSMdriver::stop() {
-        Lock<FastMutex> l(mutex);
-        if (status != STARTED) return; // If timer disabled ignore the call
-        status = STOPPED;
+        //Lock<FastMutex> l(mutex);
+        //if (status != STARTED) return; // If timer disabled ignore the call
+        //status = STOPPED;
         // Erase the value in the capture/compare registers
         TIM3->CCR2 = 0;
         TIM1->CCR1 = 0;
@@ -309,8 +317,8 @@ namespace miosix {
     }
 
     void PMSMdriver::setHighSideWidth(char channel, float pulseWidth) {
-        Lock<FastMutex> l(mutex);
-        if (status != STARTED) return; // If timer disabled ignore the call
+        //Lock<FastMutex> l(mutex);
+        //if (status != STARTED) return; // If timer disabled ignore the call
         switch (channel) {
             case 0:
                 TIM3->CCR2 = pulseWidth * PWM_RESOLUTION;
@@ -330,8 +338,8 @@ namespace miosix {
     }
 
     void PMSMdriver::setLowSide(char channel, bool value) {
-        Lock<FastMutex> l(mutex);
-        if (status != STARTED) return; // If timer disabled ignore the call
+        //Lock<FastMutex> l(mutex);
+        //if (status != STARTED) return; // If timer disabled ignore the call
         switch (channel) {
             case 1:
                 value == 1 ? outSignalL1::high() : outSignalL1::low();
@@ -347,7 +355,8 @@ namespace miosix {
         }
     }
 
-    bool PMSMdriver::waitForCycleBegin() {
+    
+    /*bool PMSMdriver::waitForCycleBegin() {
         // No need to lock the mutex because disabling interrupts is enough to avoid
         // race conditions. Also, locking the mutex here would prevent other threads
         // from calling other member functions of this class
@@ -355,7 +364,7 @@ namespace miosix {
         if (status != STARTED) return true;
         IRQwaitForTimerOverflow(dLock);
         return status != STARTED;
-    }
+    }*/
 
     void PMSMdriver::setupHallSensors() {
         hallSensor1::mode(Mode::INPUT);
@@ -381,7 +390,7 @@ namespace miosix {
         enableGate::low();
     }
 
-    void PMSMdriver::updateFaultFlag() {
+    void PMSMdriver::updateFaultFlag(){
         faultFlag = faultPin::value();
     }
 
@@ -390,10 +399,10 @@ namespace miosix {
         return faultFlag;
     }
 
-    int PMSMdriver::trapezoidalDrive(float dutyCycle, bool direction) {
+    int PMSMdriver::trapezoidalDrive() {
         updateHallEffectSensorsValue();
         if (hallEffectSensors_oldPosition != hallEffectSensors_newPosition) {
-            if (direction == CW) {
+            if (vDirection == CW) {
                 if (hallEffectSensors_newPosition == 0b001) {
                     setLowSide(2, 0);
                     setLowSide(3, 0);
@@ -401,7 +410,7 @@ namespace miosix {
                     setHighSideWidth(3, 0);
 
                     setLowSide(1, 1);
-                    setHighSideWidth(2, dutyCycle);
+                    setHighSideWidth(2, vDutyCycle);
                 } else if (hallEffectSensors_newPosition == 0b101) {
                     setLowSide(2, 0);
                     setLowSide(3, 0);
@@ -409,7 +418,7 @@ namespace miosix {
                     setHighSideWidth(2, 0);
 
                     setLowSide(1, 1);
-                    setHighSideWidth(3, dutyCycle);
+                    setHighSideWidth(3, vDutyCycle);
                 } else if (hallEffectSensors_newPosition == 0b100) {
                     setLowSide(1, 0);
                     setLowSide(3, 0);
@@ -417,7 +426,7 @@ namespace miosix {
                     setHighSideWidth(2, 0);
 
                     setLowSide(2, 1);
-                    setHighSideWidth(3, dutyCycle);
+                    setHighSideWidth(3, vDutyCycle);
                 } else if (hallEffectSensors_newPosition == 0b110) {
                     setLowSide(1, 0);
                     setLowSide(3, 0);
@@ -425,7 +434,7 @@ namespace miosix {
                     setHighSideWidth(3, 0);
 
                     setLowSide(2, 1);
-                    setHighSideWidth(1, dutyCycle);
+                    setHighSideWidth(1, vDutyCycle);
                 } else if (hallEffectSensors_newPosition == 0b010) {
                     setLowSide(1, 0);
                     setLowSide(2, 0);
@@ -433,7 +442,7 @@ namespace miosix {
                     setHighSideWidth(3, 0);
 
                     setLowSide(3, 1);
-                    setHighSideWidth(1, dutyCycle);
+                    setHighSideWidth(1, vDutyCycle);
                 } else if (hallEffectSensors_newPosition == 0b011) {
                     setLowSide(1, 0);
                     setLowSide(2, 0);
@@ -441,14 +450,41 @@ namespace miosix {
                     setHighSideWidth(3, 0);
 
                     setLowSide(3, 1);
-                    setHighSideWidth(2, dutyCycle);
+                    setHighSideWidth(2, vDutyCycle);
                 }
-            } else if (direction == CCW) {}
+            } else if (vDirection == CCW) {}
             return 1;
         }
         else {
             return 0;
         }
+    }
+    
+    void PMSMdriver::setupControlTimer(unsigned int frequency){
+         // Initialize Timer 2 to apply the trapezoidal drive @ 80kHz
+        TIM2->CR1 = 0;
+        TIM2->DIER = TIM_DIER_UIE;
+        TIM2->EGR = TIM_EGR_UG;
+        NVIC_SetPriority(TIM2_IRQn, 15); //Low priority for timer IRQ
+        NVIC_EnableIRQ(TIM2_IRQn);
+        //TIM2->CCMR1 |= TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2PE;
+        //TIM2->CCER |= TIM_CCER_CC2E;
+        uint32_t TIMER_Frequency = SystemCoreClock / 2; // From the data sheet
+        uint32_t COUNTER_Frequency = PWM_RESOLUTION * frequency; // How many steps inside a Period
+        uint32_t PSC_Value = (TIMER_Frequency / COUNTER_Frequency) - 1; // Pre-scaler
+        uint16_t ARR_Value = PWM_RESOLUTION - 1; // Top value to count to
+        TIM2->PSC = PSC_Value;  //  Prescaler
+        TIM2->ARR = ARR_Value;
+        TIM2->CNT = 0;
+        TIM2->CR1 = TIM_CR1_CEN;
+    }
+    
+    void PMSMdriver::changeDutyCycle (float dutyCycle){
+        vDutyCycle = dutyCycle;
+    }
+    
+    void PMSMdriver::changeDirection (float direction){
+        vDutyCycle = direction;
     }
 
     void PMSMdriver::IRQwaitForTimerOverflow(FastInterruptDisableLock& dLock) {

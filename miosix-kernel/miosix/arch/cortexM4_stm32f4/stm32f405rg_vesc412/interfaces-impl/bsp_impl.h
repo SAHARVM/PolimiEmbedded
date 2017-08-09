@@ -64,6 +64,10 @@ inline void greenLED_off()
     _greenLED::low();
 }
 
+/*inline void greenLED_toggle()
+{
+    _greenLED::toggle();
+}*/
 
 typedef Gpio<GPIOC_BASE,5> _redLED;
 
@@ -76,6 +80,11 @@ inline void redLED_off()
 {
     _redLED::low();
 }
+
+/*inline void redLED_toggle()
+{
+    _redLED::toggle();
+}*/
 
 /**
  * Polls the SD card sense GPIO.

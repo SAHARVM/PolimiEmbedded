@@ -49,18 +49,18 @@ namespace miosix {
          * waveform until the first call to setPosition()
          * \param channel which channel to enable, must be between 0 and 3.
          */
-        void enable();
+        static void enable();
 
         /**
          * Disable a channel. Can only be called with the outputs stopped.
          * \param channel which channel to disable, must be between 0 and 3.
          */
-        void disable();
+        static void disable();
 
         /**
          * Start producing the output waveforms.
          */
-        void start();
+        static void start();
 
         /**
          * Stop producing the output waveforms. If a thread is waiting in
@@ -72,7 +72,7 @@ namespace miosix {
          * to not produce glitches. For this reason, it may take up to
          * 1/getFrequency() to complete, which with the default value of 50Hz is 20ms
          */
-        void stop();
+        static void stop();
 
         /**
          * Wait until the begin of a waveform generation cycle
@@ -87,53 +87,53 @@ namespace miosix {
          * Set the output frequency. Only to be called with outputs stopped.
          * @param frequency in Hz
          */
-        void setFrequency(unsigned int frequency);
+        static void setFrequency(unsigned int frequency);
 
         /**
          * Initialize the ports for the hall effect sensors
          */
-        void setupHallSensors();
+        static void setupHallSensors();
 
         /**
          * Obtains the value of the hall effect sensors connected to PB6, 7 and PC11
          * @return Hall effect sensors A, B and C value in the 3 LSB of a byte
          * i.e. 0b 0 0 0 0  0 hC hB hA
          */
-        char getHallEffectSensorsValue();
+        static char getHallEffectSensorsValue();
 
         /**
          * 
          */
-        void updateHallEffectSensorsValue();
+        static void updateHallEffectSensorsValue();
 
         /**
          * Set the absolute pulse width of the PWM signal
          * @param pulseWidth float from 0 to 1
          */
-        void setHighSideWidth(char channel, float pulseWidth);
+        static void setHighSideWidth(char channel, float pulseWidth);
 
         /**
          * Sets up the main driving timer, which reads the hall effect sensors,
          * If there is any change, change the driving gates
          * @param frequency
          */
-        void setupDriverTimer(unsigned int frequency);
+        static void setupDriverTimer(unsigned int frequency);
 
         /**
          * 
          * @param referenceSpeed
          */
-        void speedControl(float referenceSpeed);
+        static void speedControl(float referenceSpeed);
 
         /**
          * 
          */
-        void enableDriver();
+        static void enableDriver();
 
         /**
          * 
          */
-        void disableDriver();
+        static void disableDriver();
 
         /**
          * 
@@ -141,25 +141,34 @@ namespace miosix {
          * @param value
          * @return 
          */
-        void setLowSide(char channel, bool value);
+        static void setLowSide(char channel, bool value);
 
         /**
          * 
          */
-        void updateFaultFlag();
+        static void updateFaultFlag();
 
         /**
         * 
         * @return 
         */
-        bool getFaultFlag();
+        static bool getFaultFlag();
         
         /**
          * 
          * @param dutyCycle
          * @return 
          */
-        int trapezoidalDrive(float dutyCycle, bool direction);
+        static int trapezoidalDrive();
+        
+        static void changeDutyCycle (float dutyCycle);
+        
+        static void changeDirection (float direction);
+        
+        //static char hallEffectSensors_newPosition;// = 0;
+        //static char hallEffectSensors_oldPosition;// = 0;
+        bool motorRunning = 0;
+        static bool faultFlag;// = 0;  
 
     private:
         PMSMdriver(const PMSMdriver&);
@@ -175,21 +184,21 @@ namespace miosix {
          * interrupts disabled
          */
         static void IRQwaitForTimerOverflow(FastInterruptDisableLock& dLock);
-
-        //float minWidth, maxWidth; ///< Minimum and maximum pulse widths
-        //float a, b, c; ///< Precomputed coefficients
+        
+        
+        /**
+         * 
+         * @param frequency
+         */
+        static void setupControlTimer(unsigned int frequency);
+        
         FastMutex mutex; ///< Mutex to protect from concurrent access
 
-        char hallEffectSensors_newPosition = 0;
-        char hallEffectSensors_oldPosition = 0;
-        bool motorRunning = 0;
-        bool faultFlag = 0;
-        //bool direction = 0; // 0 is CW, 1 is CCW
 
-        enum {
+        /*enum {
             STOPPED, ///< Timer is stopped
             STARTED ///< Timer is started
-        } status;
+        } status;*/
     };
 
 } //namespace miosix
