@@ -16,7 +16,9 @@
 
 #include "miosix.h"
 
-#define PWM_RESOLUTION 1000
+#define PWM_RESOLUTION 100
+#define CW 0
+#define CCW 1
 
 namespace miosix {
 
@@ -80,14 +82,10 @@ namespace miosix {
          * so don't do it!
          */
         bool waitForCycleBegin();
-
+        
         /**
-         * Set the frequency of the generated waveform. Can only be called
-         * with the outputs stopped. The default is 50Hz. Note that due to prescaler
-         * resolution, the actual frequency is set to the closest possible value.
-         * To know the actual frequency, call getFrequency()
-         * \param frequency desired servo update frequency in Hz
-         * Must be between 10 and 100Hz
+         * Set the output frequency. Only to be called with outputs stopped.
+         * @param frequency in Hz
          */
         void setFrequency(unsigned int frequency);
 
@@ -112,7 +110,7 @@ namespace miosix {
          * Set the absolute pulse width of the PWM signal
          * @param pulseWidth float from 0 to 1
          */
-        void setWidth(char channel, float pulseWidth);
+        void setHighSideWidth(char channel, float pulseWidth);
 
         /**
          * Sets up the main driving timer, which reads the hall effect sensors,
@@ -156,7 +154,12 @@ namespace miosix {
         */
         bool getFaultFlag();
         
-        int trapezoidalDrive(float dutyCycle);
+        /**
+         * 
+         * @param dutyCycle
+         * @return 
+         */
+        int trapezoidalDrive(float dutyCycle, bool direction);
 
     private:
         PMSMdriver(const PMSMdriver&);
@@ -181,6 +184,7 @@ namespace miosix {
         char hallEffectSensors_oldPosition = 0;
         bool motorRunning = 0;
         bool faultFlag = 0;
+        //bool direction = 0; // 0 is CW, 1 is CCW
 
         enum {
             STOPPED, ///< Timer is stopped

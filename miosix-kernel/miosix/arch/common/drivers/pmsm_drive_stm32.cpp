@@ -195,7 +195,7 @@ namespace miosix {
             FastInterruptDisableLock dLock;
             // Calling the mode() function on a GPIO is subject to race conditions
             // between threads on the STM32, so we disable interrupts
-            
+
             /*
              *  PWM configuration:
              *      CCMRn - capture/compare mode register 1 (for channels 1 and 2) and 2 (for channel 3):
@@ -206,15 +206,15 @@ namespace miosix {
              *      CCER - Capture/compare enable register:
              *          - Capture/Compare 1 output enable
              *              TIM_CCER_CCxE
-             */   
-            
+             */
+
             TIM3->CCMR1 |= TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2PE;
             TIM3->CCER |= TIM_CCER_CC2E;
             pwmSignal0::alternateFunction(2);
             pwmSignal0::mode(Mode::ALTERNATE);
 
             TIM1->CCMR1 |= TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1PE;
-            TIM1->CCER |= TIM_CCER_CC1E; 
+            TIM1->CCER |= TIM_CCER_CC1E;
             pwmSignalH3::alternateFunction(1);
             pwmSignalH3::mode(Mode::ALTERNATE);
 
@@ -308,7 +308,7 @@ namespace miosix {
         TIM1->CR1 = 0;
     }
 
-    void PMSMdriver::setWidth(char channel, float pulseWidth) {
+    void PMSMdriver::setHighSideWidth(char channel, float pulseWidth) {
         Lock<FastMutex> l(mutex);
         if (status != STARTED) return; // If timer disabled ignore the call
         switch (channel) {
@@ -316,13 +316,13 @@ namespace miosix {
                 TIM3->CCR2 = pulseWidth * PWM_RESOLUTION;
                 break;
             case 1:
-                TIM1->CCR1 = pulseWidth * PWM_RESOLUTION;
+                TIM1->CCR3 = pulseWidth * PWM_RESOLUTION;
                 break;
             case 2:
                 TIM1->CCR2 = pulseWidth * PWM_RESOLUTION;
                 break;
             case 3:
-                TIM1->CCR3 = pulseWidth * PWM_RESOLUTION;
+                TIM1->CCR1 = pulseWidth * PWM_RESOLUTION;
                 break;
             default:
                 break;
@@ -369,6 +369,7 @@ namespace miosix {
     }
 
     char PMSMdriver::getHallEffectSensorsValue() {
+        updateHallEffectSensorsValue();
         return hallEffectSensors_newPosition;
     }
 
@@ -385,7 +386,69 @@ namespace miosix {
     }
 
     bool PMSMdriver::getFaultFlag() {
+        updateFaultFlag();
         return faultFlag;
+    }
+
+    int PMSMdriver::trapezoidalDrive(float dutyCycle, bool direction) {
+        updateHallEffectSensorsValue();
+        if (hallEffectSensors_oldPosition != hallEffectSensors_newPosition) {
+            if (direction == CW) {
+                if (hallEffectSensors_newPosition == 0b001) {
+                    setLowSide(2, 0);
+                    setLowSide(3, 0);
+                    setHighSideWidth(1, 0);
+                    setHighSideWidth(3, 0);
+
+                    setLowSide(1, 1);
+                    setHighSideWidth(2, dutyCycle);
+                } else if (hallEffectSensors_newPosition == 0b101) {
+                    setLowSide(2, 0);
+                    setLowSide(3, 0);
+                    setHighSideWidth(1, 0);
+                    setHighSideWidth(2, 0);
+
+                    setLowSide(1, 1);
+                    setHighSideWidth(3, dutyCycle);
+                } else if (hallEffectSensors_newPosition == 0b100) {
+                    setLowSide(1, 0);
+                    setLowSide(3, 0);
+                    setHighSideWidth(1, 0);
+                    setHighSideWidth(2, 0);
+
+                    setLowSide(2, 1);
+                    setHighSideWidth(3, dutyCycle);
+                } else if (hallEffectSensors_newPosition == 0b110) {
+                    setLowSide(1, 0);
+                    setLowSide(3, 0);
+                    setHighSideWidth(2, 0);
+                    setHighSideWidth(3, 0);
+
+                    setLowSide(2, 1);
+                    setHighSideWidth(1, dutyCycle);
+                } else if (hallEffectSensors_newPosition == 0b010) {
+                    setLowSide(1, 0);
+                    setLowSide(2, 0);
+                    setHighSideWidth(2, 0);
+                    setHighSideWidth(3, 0);
+
+                    setLowSide(3, 1);
+                    setHighSideWidth(1, dutyCycle);
+                } else if (hallEffectSensors_newPosition == 0b011) {
+                    setLowSide(1, 0);
+                    setLowSide(2, 0);
+                    setHighSideWidth(1, 0);
+                    setHighSideWidth(3, 0);
+
+                    setLowSide(3, 1);
+                    setHighSideWidth(2, dutyCycle);
+                }
+            } else if (direction == CCW) {}
+            return 1;
+        }
+        else {
+            return 0;
+        }
     }
 
     void PMSMdriver::IRQwaitForTimerOverflow(FastInterruptDisableLock& dLock) {
