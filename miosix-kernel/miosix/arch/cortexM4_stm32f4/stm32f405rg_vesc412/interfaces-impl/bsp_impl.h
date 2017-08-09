@@ -79,19 +79,7 @@ inline void redLED_off()
 
 /**
  * Polls the SD card sense GPIO.
- * 
- * This board has no SD card whatsoever, but a card can be connected to the
- * following GPIOs:
- * D0  : PC8
- * D1  : PC9
- * D2  : PC10 (conflicts with CS43L22 SCK)
- * D3  : PC11
- * CLK : PC12 (conflicts with CS43L22 SDIN)
- * CMD : PD2
- * 
- * The conflicts mean that it's not possible to use both the SD card and
- * the audio playback feature on this board.
- * 
+ * But the VESC board doesn't have an SD card.
  * \return true. As there's no SD card sense switch, let's pretend that
  * the card is present.
  */

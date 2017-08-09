@@ -1,5 +1,4 @@
 
-#define VESC412
 
 #include <stdio.h>
 #include <iostream>
@@ -20,29 +19,45 @@ void th_PMSM_PWM(void *argv) {
     //Run every 10 milliseconds
     const int period = static_cast<int> (TICK_FREQ * 0.001);
     long long tick = getTick();
-    
+
     cout << "VESC Board Initialization" << endl;
 
     PMSMdriver& driveSignals = PMSMdriver::instance();
     driveSignals.setFrequency(1000);
     driveSignals.enable();
     driveSignals.start();
-    driveSignals.setWidth(0);
+    driveSignals.setWidth(0, 0);
+    driveSignals.setWidth(1, 0);
+    driveSignals.setWidth(2, 0);
+    driveSignals.setWidth(3, 0);
+
+    driveSignals.enableDriver();
+    //driveSignals.setLowSide(2, 1);
 
     cout << "PWM signals initialized" << endl;
-    
-    while(1) {
+
+    while (1) {
         for (float i = 0; i <= 1; i += .001) {
-            driveSignals.setWidth(i);
+            driveSignals.setWidth(0, i);
+            driveSignals.setWidth(1, i);
+            driveSignals.setWidth(2, i);
+            driveSignals.setWidth(3, i);
             tick += period;
             Thread::sleepUntil(tick);
         }
         for (float i = 1; i >= 0; i -= .001) {
-            driveSignals.setWidth(i);
+            driveSignals.setWidth(0, i);
+            driveSignals.setWidth(1, i);
+            driveSignals.setWidth(2, i);
+            driveSignals.setWidth(3, i);
             tick += period;
             Thread::sleepUntil(tick);
         }
-        cout << driveSignals.getHallEffectSensorsValue() << endl;
+        driveSignals.updateHallEffectSensorsValue();
+        driveSignals.updateFaultFlag();
+        cout << "H.E.S. value=" << driveSignals.getHallEffectSensorsValue() 
+                << "; DRV_FaultFlag=" << driveSignals.getFaultFlag() 
+                << endl;
     }
 }
 
@@ -67,12 +82,7 @@ int main() {
     thread1 = Thread::create(th_PMSM_PWM, 2048, 1, NULL, Thread::DEFAULT);
     thread2 = Thread::create(th_1s_tick, 2048, 2, NULL, Thread::DEFAULT);
 
-
-    
-
-    
     while (1) {
-
     }
 
     return 0;

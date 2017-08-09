@@ -21,13 +21,15 @@
 namespace miosix {
 
     /**
-     * This class is designed to drive up to 4 servomotors. It generates
-     * four square waves that are synchronized with respect to each other,
-     * and allows the execution of code that is too synchronized with the
-     * waveform generation, to ease the development of closed loop control
-     * code using the servos as actuators.
-     * This class can be safely accessed by multiple threads, except the
-     * waitForCycleBegin() member function.
+     * This class is designed to drive a Permanent Magnet Synchronous Machine (PMSM)
+     * by generating 3 PWM signals that are managed by a specific control method
+     * This class also handles:
+     *  -Signals to work with Texas Instruments PMSM driver DRV8302
+     *  -ADC signals
+     *  -Hall effect sensors signals
+     *  -Absolute position encoder (later)
+     *  -CAN
+     *  -etc...
      */
     class PMSMdriver {
     public:
@@ -88,23 +90,73 @@ namespace miosix {
          * Must be between 10 and 100Hz
          */
         void setFrequency(unsigned int frequency);
-        
+
         /**
-         * 
+         * Initialize the ports for the hall effect sensors
          */
         void setupHallSensors();
-        
+
         /**
-         *  TODO: write something
-         * @return Hall effect sensors A, B and C value in the 3 first bits of a byte
+         * Obtains the value of the hall effect sensors connected to PB6, 7 and PC11
+         * @return Hall effect sensors A, B and C value in the 3 LSB of a byte
          * i.e. 0b 0 0 0 0  0 hC hB hA
          */
         char getHallEffectSensorsValue();
 
-        /*
-         * Set the absolute pulse width of the PWM signal
+        /**
+         * 
          */
-        void setWidth(float pulseWidth);
+        void updateHallEffectSensorsValue();
+
+        /**
+         * Set the absolute pulse width of the PWM signal
+         * @param pulseWidth float from 0 to 1
+         */
+        void setWidth(char channel, float pulseWidth);
+
+        /**
+         * Sets up the main driving timer, which reads the hall effect sensors,
+         * If there is any change, change the driving gates
+         * @param frequency
+         */
+        void setupDriverTimer(unsigned int frequency);
+
+        /**
+         * 
+         * @param referenceSpeed
+         */
+        void speedControl(float referenceSpeed);
+
+        /**
+         * 
+         */
+        void enableDriver();
+
+        /**
+         * 
+         */
+        void disableDriver();
+
+        /**
+         * 
+         * @param channel
+         * @param value
+         * @return 
+         */
+        void setLowSide(char channel, bool value);
+
+        /**
+         * 
+         */
+        void updateFaultFlag();
+
+        /**
+        * 
+        * @return 
+        */
+        bool getFaultFlag();
+        
+        int trapezoidalDrive(float dutyCycle);
 
     private:
         PMSMdriver(const PMSMdriver&);
@@ -125,8 +177,11 @@ namespace miosix {
         //float a, b, c; ///< Precomputed coefficients
         FastMutex mutex; ///< Mutex to protect from concurrent access
 
-        char hallEffectSensorsPosition = 0;
-        
+        char hallEffectSensors_newPosition = 0;
+        char hallEffectSensors_oldPosition = 0;
+        bool motorRunning = 0;
+        bool faultFlag = 0;
+
         enum {
             STOPPED, ///< Timer is stopped
             STARTED ///< Timer is started
