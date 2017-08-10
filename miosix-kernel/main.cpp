@@ -15,6 +15,9 @@
 #define DEFAULT_KI 0.05
 #define DEFAULT_KD 0.0
 
+#define MONITOR_LABVIEW
+//#define MONITOR_CONSOLE
+
 using namespace std;
 using namespace miosix;
 
@@ -29,7 +32,7 @@ float kd = DEFAULT_KD; // derivative constant
 
 void thread_SerialControl(void *argv) {
 
-    const int period = static_cast<int> (TICK_FREQ * 1);
+    const int period = static_cast<int> (TICK_FREQ * .01);
     long long tick = getTick();
 
     PMSMdriver::instance();
@@ -37,8 +40,37 @@ void thread_SerialControl(void *argv) {
     PMSMdriver::enable();
     PMSMdriver::start();
 
-    //Run every second
+    //Run every 10ms
     while (1) {
+#ifdef MONITOR_LABVIEW
+        string instruction;
+        cin >> instruction;
+        if (instruction == "start") {
+            cout << "ok" << endl;
+            PMSMdriver::enableDriver();
+            dutyCycle = .1;
+            speed = 2500;
+            PMSMdriver::changeDutyCycle(dutyCycle);
+        } else if (instruction == "stop") {
+            cout << "ok" << endl;
+            PMSMdriver::disableDriver();
+            dutyCycle = 0;
+            speed = 0;
+            PMSMdriver::changeDutyCycle(dutyCycle);
+        } else if (instruction == "gs") {
+            cout << PMSMdriver::getSpeed(0) << endl;
+        } else if (instruction == "ss") {
+            float inSpeed;
+            cin >> inSpeed;
+            if ((inSpeed <= TOP_SPEED_DPS) && (inSpeed >= 2000)) {
+                speed = inSpeed;
+            }
+        } else if (instruction == "gk"){
+            cout << kp << endl;
+            cout << ki << endl;
+            cout << kd << endl;
+        }
+#else
         cout << "Input instruction: ";
         string instruction;
         cin >> instruction;
@@ -74,7 +106,7 @@ void thread_SerialControl(void *argv) {
                 cout << "Speed must be a float value between 2000 and " << TOP_SPEED_DPS << endl;
             } else {
                 speed = inSpeed;
-                cout << "Speed = " << speed << endl; 
+                cout << "Speed = " << speed << endl;
                 // This value will be taken by the other thread
                 // maybe I can implement another mechanism
             }
@@ -82,22 +114,23 @@ void thread_SerialControl(void *argv) {
             cout << "[GetSpeed]" << endl;
             cout << "Speed = " << PMSMdriver::getSpeed(0) << " DPS"
                     << " = " << PMSMdriver::getSpeed(1) << " RPM" << endl;
-        }else if (instruction == "kp"){
+        } else if (instruction == "kp") {
             cout << "[Set Kp]" << endl;
             cout << "Kp = " << kp << " write new Kp" << endl;
             cin >> kp;
             cout << "New Kp = " << kp << endl;
-        } else if (instruction == "ki"){
+        } else if (instruction == "ki") {
             cout << "[Set Ki]" << endl;
             cout << "Ki = " << ki << " write new Ki" << endl;
             cin >> ki;
             cout << "New Ki = " << ki << endl;
-        } else if (instruction == "kd"){
+        } else if (instruction == "kd") {
             cout << "[Set Kd]" << endl;
             cout << "Kd = " << kd << " write new Kd" << endl;
             cin >> kd;
             cout << "New Kd = " << kd << endl;
         }
+#endif 
         tick += period;
         Thread::sleepUntil(tick);
     }
@@ -136,21 +169,21 @@ void thread_PMSM_PID(void *argv) {
 
     while (1) {
         if (PMSMdriver::getMotorStatus()) {
-                err_1 = err_0; // store previous error value
-                intErr_1 = intErr_0; // store previous integral error value
-                err_0 = (speed - PMSMdriver::getSpeed(0)) / TOP_SPEED_DPS; // get new error value
-                intErr_0 = intErr_1 + err_0;
-                derErr = err_0 - err_1;
-                pTerm = kp * err_0;
-                iTerm = ki * intErr_0 * dt;
-                dTerm = kd * derErr / dt;
-                //if (iTerm >= 1) iTerm = 1;
-                //if (iTerm <= -1) iTerm = -1;
-                q = pTerm + iTerm + dTerm;
-                dutyCycle += q;
-                if (dutyCycle < .1) dutyCycle = .1;
-                PMSMdriver::changeDutyCycle(dutyCycle);
-            }
+            err_1 = err_0; // store previous error value
+            intErr_1 = intErr_0; // store previous integral error value
+            err_0 = (speed - PMSMdriver::getSpeed(0)) / TOP_SPEED_DPS; // get new error value
+            intErr_0 = intErr_1 + err_0;
+            derErr = err_0 - err_1;
+            pTerm = kp * err_0;
+            iTerm = ki * intErr_0 * dt;
+            dTerm = kd * derErr / dt;
+            //if (iTerm >= 1) iTerm = 1;
+            //if (iTerm <= -1) iTerm = -1;
+            q = pTerm + iTerm + dTerm;
+            dutyCycle += q;
+            if (dutyCycle < .1) dutyCycle = .1;
+            PMSMdriver::changeDutyCycle(dutyCycle);
+        }
         /*********************************************************************************/
         tick += period;
         Thread::sleepUntil(tick);
