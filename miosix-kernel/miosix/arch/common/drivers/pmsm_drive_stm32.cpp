@@ -36,9 +36,7 @@ typedef Gpio<GPIOB_BASE, 15> pwmSignalL1; // TIM1_CH3N
 typedef Gpio<GPIOB_BASE, 6> hallSensor1;
 typedef Gpio<GPIOB_BASE, 7> hallSensor2;
 typedef Gpio<GPIOC_BASE, 11> hallSensor3;
-
 typedef Gpio<GPIOC_BASE, 10> enableGate;
-
 typedef Gpio<GPIOC_BASE, 12> faultPin; // TODO: implement monitor and handler for this signal
 
 static Thread *waiting = 0;
@@ -48,14 +46,16 @@ char hallEffectSensors_oldPosition = 0;
 
 float vDutyCycle = 0;
 bool vDirection = 0; // 0 is CW, 1 is CCW  
+int speedCounter = 0;
+float speedDPS = 0;
+float speedRPM = 0;
+bool motorRunning = 0;
 
 /**
  * Timer 1 interrupt handler actual implementation
  */
 void __attribute__ ((used)) tim1impl() {
-    /* The code of the interrupt handler goes from here...*/
     TIM1->SR = 0; // Clear interrupt flags
-    /*... to here*/
 
     if (waiting == 0) return;
     waiting->IRQwakeup();
@@ -79,10 +79,10 @@ void __attribute__ ((naked)) TIM1_CC_IRQHandler() {
 
 void __attribute__ ((used)) tim2impl() {
     /* The code of the interrupt handler goes from here...*/
-    
+
     TIM2->SR = 0; // Clear interrupt flags
-    PMSMdriver::trapezoidalDrive();
-   
+    if (PMSMdriver::getMotorStatus()) PMSMdriver::trapezoidalDrive();
+
     /*... to here*/
 
     if (waiting == 0) return;
@@ -122,7 +122,6 @@ void __attribute__ ((naked)) TIM3_IRQHandler() {
     restoreContext();
 }
 
-
 namespace miosix {
 
     //
@@ -135,7 +134,8 @@ namespace miosix {
     }
 
     //PMSMdriver::PMSMdriver()/* : status(STOPPED) */{
-    PMSMdriver::PMSMdriver(){
+
+    PMSMdriver::PMSMdriver() {
         {
             FastInterruptDisableLock dLock;
             // The RCC register should be written with interrupts disabled to
@@ -171,8 +171,7 @@ namespace miosix {
         enableGate::mode(Mode::OUTPUT);
         faultPin::mode(Mode::INPUT); // Doesn't have a handler yet
         disableDriver(); // Must be enabled later to drive the power MOS gates
-        setupControlTimer(15000);
-        
+        setupControlTimer(CONTROL_TIMER_FREQUENCY);
     }
 
     void PMSMdriver::setFrequency(unsigned int PWM_frequency) {
@@ -355,7 +354,6 @@ namespace miosix {
         }
     }
 
-    
     /*bool PMSMdriver::waitForCycleBegin() {
         // No need to lock the mutex because disabling interrupts is enough to avoid
         // race conditions. Also, locking the mutex here would prevent other threads
@@ -383,14 +381,16 @@ namespace miosix {
     }
 
     void PMSMdriver::enableDriver() {
+        motorRunning = 1;
         enableGate::high();
     }
 
     void PMSMdriver::disableDriver() {
+        motorRunning = 0;
         enableGate::low();
     }
 
-    void PMSMdriver::updateFaultFlag(){
+    void PMSMdriver::updateFaultFlag() {
         faultFlag = faultPin::value();
     }
 
@@ -401,67 +401,56 @@ namespace miosix {
 
     int PMSMdriver::trapezoidalDrive() {
         updateHallEffectSensorsValue();
+        calculateSpeed();
         if (hallEffectSensors_oldPosition != hallEffectSensors_newPosition) {
+            allGatesLow();
             if (vDirection == CW) {
                 if (hallEffectSensors_newPosition == 0b001) {
-                    setLowSide(2, 0);
-                    setLowSide(3, 0);
-                    setHighSideWidth(1, 0);
-                    setHighSideWidth(3, 0);
-
                     setLowSide(1, 1);
                     setHighSideWidth(2, vDutyCycle);
                 } else if (hallEffectSensors_newPosition == 0b101) {
-                    setLowSide(2, 0);
-                    setLowSide(3, 0);
-                    setHighSideWidth(1, 0);
-                    setHighSideWidth(2, 0);
-
                     setLowSide(1, 1);
                     setHighSideWidth(3, vDutyCycle);
                 } else if (hallEffectSensors_newPosition == 0b100) {
-                    setLowSide(1, 0);
-                    setLowSide(3, 0);
-                    setHighSideWidth(1, 0);
-                    setHighSideWidth(2, 0);
-
                     setLowSide(2, 1);
                     setHighSideWidth(3, vDutyCycle);
                 } else if (hallEffectSensors_newPosition == 0b110) {
-                    setLowSide(1, 0);
-                    setLowSide(3, 0);
-                    setHighSideWidth(2, 0);
-                    setHighSideWidth(3, 0);
-
                     setLowSide(2, 1);
                     setHighSideWidth(1, vDutyCycle);
                 } else if (hallEffectSensors_newPosition == 0b010) {
-                    setLowSide(1, 0);
-                    setLowSide(2, 0);
-                    setHighSideWidth(2, 0);
-                    setHighSideWidth(3, 0);
-
                     setLowSide(3, 1);
                     setHighSideWidth(1, vDutyCycle);
                 } else if (hallEffectSensors_newPosition == 0b011) {
-                    setLowSide(1, 0);
-                    setLowSide(2, 0);
-                    setHighSideWidth(1, 0);
-                    setHighSideWidth(3, 0);
-
                     setLowSide(3, 1);
                     setHighSideWidth(2, vDutyCycle);
                 }
-            } else if (vDirection == CCW) {}
+            } else if (vDirection == CCW) {
+            }
             return 1;
-        }
-        else {
+        } else {
             return 0;
         }
     }
+
+    void PMSMdriver::allGatesLow(){
+        highSideGatesLow();
+        lowSideGatesLow();
+    }
     
-    void PMSMdriver::setupControlTimer(unsigned int frequency){
-         // Initialize Timer 2 to apply the trapezoidal drive @ 80kHz
+    void PMSMdriver::highSideGatesLow(){
+        setHighSideWidth(1, 0);
+        setHighSideWidth(2, 0);
+        setHighSideWidth(3, 0);
+    }
+
+    void PMSMdriver::lowSideGatesLow(){
+        setLowSide(1, 0);
+        setLowSide(2, 0);
+        setLowSide(3, 0);
+    }
+
+    void PMSMdriver::setupControlTimer(unsigned int frequency) {
+        // Initialize Timer 2 to apply the trapezoidal drive @ 80kHz
         TIM2->CR1 = 0;
         TIM2->DIER = TIM_DIER_UIE;
         TIM2->EGR = TIM_EGR_UG;
@@ -473,20 +462,44 @@ namespace miosix {
         uint32_t COUNTER_Frequency = PWM_RESOLUTION * frequency; // How many steps inside a Period
         uint32_t PSC_Value = (TIMER_Frequency / COUNTER_Frequency) - 1; // Pre-scaler
         uint16_t ARR_Value = PWM_RESOLUTION - 1; // Top value to count to
-        TIM2->PSC = PSC_Value;  //  Prescaler
+        TIM2->PSC = PSC_Value; //  Prescaler
         TIM2->ARR = ARR_Value;
         TIM2->CNT = 0;
         TIM2->CR1 = TIM_CR1_CEN;
     }
-    
-    void PMSMdriver::changeDutyCycle (float dutyCycle){
+
+    void PMSMdriver::changeDutyCycle(float dutyCycle) {
         vDutyCycle = dutyCycle;
     }
-    
-    void PMSMdriver::changeDirection (float direction){
+
+    void PMSMdriver::changeDirection(float direction) {
         vDutyCycle = direction;
     }
 
+    void PMSMdriver::calculateSpeed() {
+        if (hallEffectSensors_oldPosition == hallEffectSensors_newPosition) {
+            speedCounter++; // this will sum every 1/CONTROL_TIMER_FREQUENCY = 20us
+            // therefore, 1 rev every speedCounter*/CONTROL_TIMER_FREQUENCY
+        }
+        /*if (direction == CW...)*/
+        if ((hallEffectSensors_newPosition == 0b001)&&(hallEffectSensors_oldPosition == 0b101)) {
+            // lets do this calculations in a thread...
+            speedDPS = 360 * CONTROL_TIMER_FREQUENCY / (((float) speedCounter)*(MOTOR_POLE_PAIRS / 2));
+            speedRPM = speedDPS * 60 / 360;
+            speedCounter = 0;
+        }
+    }
+
+    float PMSMdriver::getSpeed(char type) {
+        if (type == 0) return speedDPS;
+        else if (type == 1) return speedRPM;
+        else return 0;
+    }
+
+    char PMSMdriver::getMotorStatus(){
+        return motorRunning;
+    }
+    
     void PMSMdriver::IRQwaitForTimerOverflow(FastInterruptDisableLock& dLock) {
         waiting = Thread::IRQgetCurrentThread();
         do {

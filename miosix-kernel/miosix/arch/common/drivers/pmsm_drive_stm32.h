@@ -17,6 +17,8 @@
 #include "miosix.h"
 
 #define PWM_RESOLUTION 100
+#define CONTROL_TIMER_FREQUENCY 50000
+#define MOTOR_POLE_PAIRS 8
 #define CW 0
 #define CCW 1
 
@@ -134,7 +136,7 @@ namespace miosix {
          * 
          */
         static void disableDriver();
-
+       
         /**
          * 
          * @param channel
@@ -161,13 +163,22 @@ namespace miosix {
          */
         static int trapezoidalDrive();
         
+        static void allGatesLow();
+        
+        static void highSideGatesLow();
+        
+        static void lowSideGatesLow();
+        
         static void changeDutyCycle (float dutyCycle);
         
         static void changeDirection (float direction);
         
-        //static char hallEffectSensors_newPosition;// = 0;
-        //static char hallEffectSensors_oldPosition;// = 0;
-        bool motorRunning = 0;
+        static float getSpeed (char type);
+        
+        static void calculateSpeed ();
+        
+        static char getMotorStatus();
+        
         static bool faultFlag;// = 0;  
 
     private:
