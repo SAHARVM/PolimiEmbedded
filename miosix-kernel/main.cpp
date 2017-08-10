@@ -66,9 +66,21 @@ void thread_SerialControl(void *argv) {
                 speed = inSpeed;
             }
         } else if (instruction == "gk"){
-            cout << kp << endl;
-            cout << ki << endl;
-            cout << kd << endl;
+            cout << kp*1000 << endl;
+            cout << ki*1000 << endl;
+            cout << kd*1000 << endl;
+        } else if (instruction == "skp"){
+            float kpIn;
+            cin >> kpIn;
+            kp = kpIn/1000;
+        } else if (instruction == "ski"){
+            float kiIn;
+            cin >> kiIn;
+            ki = kiIn/1000;
+        } else if (instruction == "skd"){
+            float kdIn;
+            cin >> kdIn;
+            kd = kdIn/1000;
         }
 #else
         cout << "Input instruction: ";
