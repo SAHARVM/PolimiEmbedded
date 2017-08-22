@@ -164,6 +164,14 @@ public:
     {
         p->BSRRH=1<<n;
     }
+    
+    /**
+     * Toggle pin, if it is an output
+     */
+    void toggle()
+    {
+        port->DOUTTGL=1<<n;
+    }
 
     /**
      * Allows to read the pin status
