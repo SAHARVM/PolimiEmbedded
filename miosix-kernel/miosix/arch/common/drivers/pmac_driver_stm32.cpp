@@ -1,12 +1,12 @@
 
 /* 
- * File:   pmsm_drive_stm32.cpp
+ * File:   pmac_driver_stm32.cpp
  * Author: Arturo Montufar Arreola, based on servo_stm32.cpp by Federico Terraneo
  * 
  * Created on 5 de agosto de 2017, 09:11 PM
  */
 
-#include "pmsm_drive_stm32.h"
+#include "pmac_driver_stm32.h"
 #include "kernel/scheduler/scheduler.h"
 #include <algorithm>
 #include <cstdio>
@@ -23,16 +23,20 @@ typedef Gpio<GPIOB_BASE, 5> pwmSignal0; // TIM3_CH2, this output can drive a ser
 typedef Gpio<GPIOA_BASE, 8> pwmSignalH3; // TIM1_CH1
 typedef Gpio<GPIOA_BASE, 9> pwmSignalH2; // TIM1_CH2
 typedef Gpio<GPIOA_BASE, 10> pwmSignalH1; // TIM1_CH3
-#ifdef TRAPEZOIDAL_DRIVE
+
 typedef Gpio<GPIOB_BASE, 13> outSignalL3;
 typedef Gpio<GPIOB_BASE, 14> outSignalL2;
 typedef Gpio<GPIOB_BASE, 15> outSignalL1;
-#elif SINUSOIDAL_DRIVE
-// TODO: Find out how to use complementary TIM1 signals as constant output...
-typedef Gpio<GPIOB_BASE, 13> pwmSignalL3; // TIM1_CH1N
-typedef Gpio<GPIOB_BASE, 14> pwmSignalL2; // TIM1_CH2N
-typedef Gpio<GPIOB_BASE, 15> pwmSignalL1; // TIM1_CH3N
-#endif
+
+// In output mode (forced, output compare or PWM), OCxREF can be re-directed to the OCx
+// output or to OCxN output by configuring the CCxE and CCxNE bits in the TIMx_CCER register.
+// This allows the user to send a specific waveform (such as PWM or static active level) on
+// one output while the complementary remains at its inactive level.
+
+//typedef Gpio<GPIOB_BASE, 13> pwmSignalL3; // TIM1_CH1N
+//typedef Gpio<GPIOB_BASE, 14> pwmSignalL2; // TIM1_CH2N
+//typedef Gpio<GPIOB_BASE, 15> pwmSignalL1; // TIM1_CH3N
+
 typedef Gpio<GPIOB_BASE, 6> hallSensor1;
 typedef Gpio<GPIOB_BASE, 7> hallSensor2;
 typedef Gpio<GPIOC_BASE, 11> hallSensor3;
@@ -81,7 +85,7 @@ void __attribute__ ((used)) tim2impl() {
     /* The code of the interrupt handler goes from here...*/
 
     TIM2->SR = 0; // Clear interrupt flags
-    if (PMSMdriver::getMotorStatus()) PMSMdriver::trapezoidalDrive();
+    if (PMACdriver::getMotorStatus()) PMACdriver::trapezoidalDrive();
 
     /*... to here*/
 
@@ -125,24 +129,24 @@ void __attribute__ ((naked)) TIM3_IRQHandler() {
 namespace miosix {
 
     //
-    // class PMSMdriver
+    // class PMACdriver
     //
 
-    PMSMdriver& PMSMdriver::instance() {
-        static PMSMdriver singleton;
+    PMACdriver& PMACdriver::instance() {
+        static PMACdriver singleton;
         return singleton;
     }
 
-    //PMSMdriver::PMSMdriver()/* : status(STOPPED) */{
+    //PMACdriver::PMACdriver()/* : status(STOPPED) */{
 
-    PMSMdriver::PMSMdriver() {
+    PMACdriver::PMACdriver() {
         {
             FastInterruptDisableLock dLock;
             // The RCC register should be written with interrupts disabled to
             // prevent race conditions with other threads.
             RCC->APB1ENR |= RCC_APB1ENR_TIM3EN; // Servo motor drive
-            RCC->APB2ENR |= RCC_APB2ENR_TIM1EN; // PMSM drive
-            RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; // Control PMSM
+            RCC->APB2ENR |= RCC_APB2ENR_TIM1EN; // PMAC drive
+            RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; // Control PMAC
             RCC_SYNC();
         }
 
@@ -172,9 +176,21 @@ namespace miosix {
         faultPin::mode(Mode::INPUT); // Doesn't have a handler yet
         disableDriver(); // Must be enabled later to drive the power MOS gates
         setupControlTimer(CONTROL_TIMER_FREQUENCY);
+        
+        
+        
+        /**
+         * Vedder configuration of the timers:
+         * RCC->APB2ENR |= RCC_APB2ENR_TIM1EN; // PMAC drive
+         * TIM1->PSC = 0;
+         * TIM1->CR1 |= TIM_CCMR1_CC1S_1; // compare flag when upcounting
+	 * TIM_TimeBaseStructure.TIM_Period = SYSTEM_CORE_CLOCK / (int)m_conf->foc_f_sw;
+	 * TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+	 * TIM_TimeBaseStructure.TIM_RepetitionCounter = 1; // Only generate update event on underflow
+         */
     }
 
-    void PMSMdriver::setFrequency(unsigned int PWM_frequency) {
+    void PMACdriver::setFrequency(unsigned int PWM_frequency) {
         //Lock<FastMutex> l(mutex);
         //if (status != STOPPED) return; // If timer enabled ignore the call
 
@@ -196,7 +212,7 @@ namespace miosix {
         TIM1->ARR = ARR_Value;
     }
 
-    void PMSMdriver::enable() {
+    void PMACdriver::enable() {
         //Lock<FastMutex> l(mutex);
         //if (status != STOPPED) return; // If timer enabled ignore the call
         {
@@ -249,7 +265,7 @@ namespace miosix {
         }
     }
 
-    void PMSMdriver::disable() {
+    void PMACdriver::disable() {
         //Lock<FastMutex> l(mutex);
         //if (status != STOPPED) return; // If timer enabled ignore the call
         {
@@ -278,7 +294,7 @@ namespace miosix {
         }
     }
 
-    void PMSMdriver::start() {
+    void PMACdriver::start() {
         //Lock<FastMutex> l(mutex);
         //if (status != STOPPED) return; // If timer enabled ignore the call
 
@@ -295,7 +311,7 @@ namespace miosix {
         TIM1->CR1 = TIM_CR1_CEN; // Counter Register 1 = Counter Enable
     }
 
-    void PMSMdriver::stop() {
+    void PMACdriver::stop() {
         //Lock<FastMutex> l(mutex);
         //if (status != STARTED) return; // If timer disabled ignore the call
         //status = STOPPED;
@@ -315,7 +331,7 @@ namespace miosix {
         TIM1->CR1 = 0;
     }
 
-    void PMSMdriver::setHighSideWidth(char channel, float pulseWidth) {
+    void PMACdriver::setHighSideWidth(char channel, float pulseWidth) {
         //Lock<FastMutex> l(mutex);
         //if (status != STARTED) return; // If timer disabled ignore the call
         switch (channel) {
@@ -336,7 +352,7 @@ namespace miosix {
         }
     }
 
-    void PMSMdriver::setLowSide(char channel, bool value) {
+    void PMACdriver::setLowSide(char channel, bool value) {
         //Lock<FastMutex> l(mutex);
         //if (status != STARTED) return; // If timer disabled ignore the call
         switch (channel) {
@@ -354,7 +370,7 @@ namespace miosix {
         }
     }
 
-    /*bool PMSMdriver::waitForCycleBegin() {
+    /*bool PMACdriver::waitForCycleBegin() {
         // No need to lock the mutex because disabling interrupts is enough to avoid
         // race conditions. Also, locking the mutex here would prevent other threads
         // from calling other member functions of this class
@@ -364,42 +380,42 @@ namespace miosix {
         return status != STARTED;
     }*/
 
-    void PMSMdriver::setupHallSensors() {
+    void PMACdriver::setupHallSensors() {
         hallSensor1::mode(Mode::INPUT);
         hallSensor2::mode(Mode::INPUT);
         hallSensor3::mode(Mode::INPUT);
     }
 
-    void PMSMdriver::updateHallEffectSensorsValue() {
+    void PMACdriver::updateHallEffectSensorsValue() {
         hallEffectSensors_oldPosition = hallEffectSensors_newPosition;
         hallEffectSensors_newPosition = (hallSensor1::value() << 0) | (hallSensor2::value() << 1) | (hallSensor3::value() << 2);
     }
 
-    char PMSMdriver::getHallEffectSensorsValue() {
+    char PMACdriver::getHallEffectSensorsValue() {
         updateHallEffectSensorsValue();
         return hallEffectSensors_newPosition;
     }
 
-    void PMSMdriver::enableDriver() {
+    void PMACdriver::enableDriver() {
         motorRunning = 1;
         enableGate::high();
     }
 
-    void PMSMdriver::disableDriver() {
+    void PMACdriver::disableDriver() {
         motorRunning = 0;
         enableGate::low();
     }
 
-    void PMSMdriver::updateFaultFlag() {
+    void PMACdriver::updateFaultFlag() {
         faultFlag = faultPin::value();
     }
 
-    bool PMSMdriver::getFaultFlag() {
+    bool PMACdriver::getFaultFlag() {
         updateFaultFlag();
         return faultFlag;
     }
 
-    int PMSMdriver::trapezoidalDrive() {
+    int PMACdriver::trapezoidalDrive() {
         updateHallEffectSensorsValue();
         calculateSpeed();
         if (hallEffectSensors_oldPosition != hallEffectSensors_newPosition) {
@@ -425,6 +441,25 @@ namespace miosix {
                     setHighSideWidth(2, vDutyCycle);
                 }
             } else if (vDirection == CCW) {
+                if (hallEffectSensors_newPosition == 0b001) {
+                    setLowSide(2, 1);
+                    setHighSideWidth(1, vDutyCycle);
+                } else if (hallEffectSensors_newPosition == 0b101) {
+                    setLowSide(3, 1);
+                    setHighSideWidth(1, vDutyCycle);
+                } else if (hallEffectSensors_newPosition == 0b100) {
+                    setLowSide(3, 1);
+                    setHighSideWidth(2, vDutyCycle);
+                } else if (hallEffectSensors_newPosition == 0b110) {
+                    setLowSide(1, 1);
+                    setHighSideWidth(2, vDutyCycle);
+                } else if (hallEffectSensors_newPosition == 0b010) {
+                    setLowSide(1, 1);
+                    setHighSideWidth(3, vDutyCycle);
+                } else if (hallEffectSensors_newPosition == 0b011) {
+                    setLowSide(2, 1);
+                    setHighSideWidth(3, vDutyCycle);
+                }
             }
             return 1;
         } else {
@@ -432,24 +467,24 @@ namespace miosix {
         }
     }
 
-    void PMSMdriver::allGatesLow(){
+    void PMACdriver::allGatesLow(){
         highSideGatesLow();
         lowSideGatesLow();
     }
     
-    void PMSMdriver::highSideGatesLow(){
+    void PMACdriver::highSideGatesLow(){
         setHighSideWidth(1, 0);
         setHighSideWidth(2, 0);
         setHighSideWidth(3, 0);
     }
 
-    void PMSMdriver::lowSideGatesLow(){
+    void PMACdriver::lowSideGatesLow(){
         setLowSide(1, 0);
         setLowSide(2, 0);
         setLowSide(3, 0);
     }
 
-    void PMSMdriver::setupControlTimer(unsigned int frequency) {
+    void PMACdriver::setupControlTimer(unsigned int frequency) {
         // Initialize Timer 2 to apply the trapezoidal drive @ 80kHz
         TIM2->CR1 = 0;
         TIM2->DIER = TIM_DIER_UIE;
@@ -468,15 +503,15 @@ namespace miosix {
         TIM2->CR1 = TIM_CR1_CEN;
     }
 
-    void PMSMdriver::changeDutyCycle(float dutyCycle) {
+    void PMACdriver::changeDutyCycle(float dutyCycle) {
         vDutyCycle = dutyCycle;
     }
 
-    void PMSMdriver::changeDirection(float direction) {
+    void PMACdriver::changeDirection(float direction) {
         vDutyCycle = direction;
     }
 
-    void PMSMdriver::calculateSpeed() {
+    void PMACdriver::calculateSpeed() {
         if (hallEffectSensors_oldPosition == hallEffectSensors_newPosition) {
             speedCounter++; // this will sum every 1/CONTROL_TIMER_FREQUENCY = 20us
             // therefore, 1 rev every speedCounter*/CONTROL_TIMER_FREQUENCY
@@ -490,17 +525,21 @@ namespace miosix {
         }
     }
 
-    float PMSMdriver::getSpeed(char type) {
+    float PMACdriver::getSpeed(char type) {
         if (type == 0) return speedDPS;
         else if (type == 1) return speedRPM;
         else return 0;
     }
 
-    char PMSMdriver::getMotorStatus(){
+    char PMACdriver::getMotorStatus(){
         return motorRunning;
     }
     
-    void PMSMdriver::IRQwaitForTimerOverflow(FastInterruptDisableLock& dLock) {
+    void PMACdriver::setupADC(){
+        
+    }
+    
+    void PMACdriver::IRQwaitForTimerOverflow(FastInterruptDisableLock& dLock) {
         waiting = Thread::IRQgetCurrentThread();
         do {
             Thread::IRQwait();

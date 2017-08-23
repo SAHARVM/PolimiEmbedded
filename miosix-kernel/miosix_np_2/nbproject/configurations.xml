@@ -77,8 +77,8 @@
             <df name="drivers">
               <in>dcc.cpp</in>
               <in>dcc.h</in>
-              <in>pmsm_drive_stm32.cpp</in>
-              <in>pmsm_drive_stm32.h</in>
+              <in>pmac_driver_stm32.cpp</in>
+              <in>pmac_driver_stm32.h</in>
               <in>sd_lpc2000.cpp</in>
               <in>sd_lpc2000.h</in>
               <in>sd_stm32f1.cpp</in>
@@ -608,12 +608,12 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -1346,12 +1346,12 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -1858,12 +1858,12 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -2489,12 +2489,12 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -3122,12 +3122,12 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -3605,12 +3605,12 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -4239,12 +4239,12 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -4919,7 +4919,7 @@
           </incDir>
         </ccTool>
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="8">
@@ -6156,12 +6156,12 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -6800,12 +6800,12 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -7444,12 +7444,12 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -7927,12 +7927,12 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -8425,12 +8425,12 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -9070,12 +9070,12 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -9574,12 +9574,12 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -10254,12 +10254,12 @@
             tool="1"
             flavor2="9">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -10757,12 +10757,12 @@
             tool="1"
             flavor2="9">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -11265,12 +11265,12 @@
             tool="1"
             flavor2="9">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -11989,12 +11989,12 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -12630,12 +12630,12 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -13460,12 +13460,12 @@
             tool="1"
             flavor2="8">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.cpp"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../miosix/arch/common/drivers/pmsm_drive_stm32.h"
+      <item path="../miosix/arch/common/drivers/pmac_driver_stm32.h"
             ex="false"
             tool="3"
             flavor2="0">

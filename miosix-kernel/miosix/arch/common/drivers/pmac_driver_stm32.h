@@ -5,14 +5,14 @@
  */
 
 /* 
- * File:   pmsm_drive_stm32.h
+ * File:   pmac_driver_stm32.h
  * Author: Arturo
  *
  * Created on 5 de agosto de 2017, 09:11 PM
  */
 
-#ifndef PMSM_DRIVE_STM32_H
-#define PMSM_DRIVE_STM32_H
+#ifndef PMAC_DRIVER_STM32_H
+#define PMAC_DRIVER_STM32_H
 
 #include "miosix.h"
 
@@ -25,17 +25,17 @@
 namespace miosix {
 
     /**
-     * This class is designed to drive a Permanent Magnet Synchronous Machine (PMSM)
+     * This class is designed to drive a Permanent Magnet Synchronous Machine (PMAC)
      * by generating 3 PWM signals that are managed by a specific control method
      * This class also handles:
-     *  -Signals to work with Texas Instruments PMSM driver DRV8302
+     *  -Signals to work with Texas Instruments PMAC driver DRV8302
      *  -ADC signals
      *  -Hall effect sensors signals
      *  -Absolute position encoder (later)
      *  -CAN
      *  -etc...
      */
-    class PMSMdriver {
+    class PMACdriver {
     public:
         /**
          * \return an instance of the SynchronizedServo class (singleton)
@@ -43,7 +43,7 @@ namespace miosix {
          * enable at least one channel call start() and setPosition() before the
          * servo driving waveforms will be generated.
          */
-        static PMSMdriver& instance();
+        static PMACdriver& instance();
 
         /**
          * Enable a channel. Can only be called with the outputs stopped. Even if
@@ -182,13 +182,13 @@ namespace miosix {
         static bool faultFlag;// = 0;  
 
     private:
-        PMSMdriver(const PMSMdriver&);
-        PMSMdriver& operator=(const PMSMdriver&);
+        PMACdriver(const PMACdriver&);
+        PMACdriver& operator=(const PMACdriver&);
 
         /**
          * Constructor
          */
-        PMSMdriver();
+        PMACdriver();
 
         /**
          * Wait until the timer overflows from 0xffff to 0. Can only be called with
@@ -203,6 +203,11 @@ namespace miosix {
          */
         static void setupControlTimer(unsigned int frequency);
         
+        /**
+         * 
+         */
+        static void setupADC();
+        
         FastMutex mutex; ///< Mutex to protect from concurrent access
 
 
@@ -215,4 +220,4 @@ namespace miosix {
 } //namespace miosix
 
 
-#endif /* PMSM_DRIVE_STM32_H */
+#endif /* PMAC_DRIVER_STM32_H */

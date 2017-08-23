@@ -3,20 +3,16 @@
 #include <stdio.h>
 #include <iostream>
 #include <string.h>
-#include "drivers/pmsm_drive_stm32.h"
-#include "drivers/serial_stm32.h"
-#include "kernel/logging.h"
-#include "miosix/arch/common/drivers/pmsm_drive_stm32.h"
+#include "drivers/pmac_driver_stm32.h"
 
-#define PMSM_PWM_FREQUENCY 15000
-#define TOP_SPEED_DPS 30000
+#define PMAC_PWM_FREQUENCY 15000
+#define TOP_SPEED_DPS 40000
 
 #define DEFAULT_KP 0.01
 #define DEFAULT_KI 0.05
 #define DEFAULT_KD 0.0
 
-#define MONITOR_LABVIEW
-//#define MONITOR_CONSOLE
+//#define MONITOR_LABVIEW
 
 using namespace std;
 using namespace miosix;
@@ -32,33 +28,33 @@ float kd = DEFAULT_KD; // derivative constant
 
 void thread_SerialControl(void *argv) {
 
-    const int period = static_cast<int> (TICK_FREQ * .01);
+    const int period = static_cast<int> (TICK_FREQ * .001);
     long long tick = getTick();
 
-    PMSMdriver::instance();
-    PMSMdriver::setFrequency(PMSM_PWM_FREQUENCY);
-    PMSMdriver::enable();
-    PMSMdriver::start();
+    PMACdriver::instance();
+    PMACdriver::setFrequency(PMAC_PWM_FREQUENCY);
+    PMACdriver::enable();
+    PMACdriver::start();
 
-    //Run every 10ms
+    //Run every 1ms
     while (1) {
 #ifdef MONITOR_LABVIEW
         string instruction;
         cin >> instruction;
         if (instruction == "start") {
             cout << "ok" << endl;
-            PMSMdriver::enableDriver();
+            PMACdriver::enableDriver();
             dutyCycle = .1;
             speed = 2500;
-            PMSMdriver::changeDutyCycle(dutyCycle);
+            PMACdriver::changeDutyCycle(dutyCycle);
         } else if (instruction == "stop") {
             cout << "ok" << endl;
-            PMSMdriver::disableDriver();
+            PMACdriver::disableDriver();
             dutyCycle = 0;
             speed = 0;
-            PMSMdriver::changeDutyCycle(dutyCycle);
+            PMACdriver::changeDutyCycle(dutyCycle);
         } else if (instruction == "gs") {
-            cout << PMSMdriver::getSpeed(0) << endl;
+            cout << PMACdriver::getSpeed(0) << endl;
         } else if (instruction == "ss") {
             float inSpeed;
             cin >> inSpeed;
@@ -99,16 +95,16 @@ void thread_SerialControl(void *argv) {
             cout << " -Set Kd: kd " << endl;
         } else if (instruction == "start") {
             cout << "[start]" << endl;
-            PMSMdriver::enableDriver();
+            PMACdriver::enableDriver();
             dutyCycle = .1;
             speed = 2500;
-            PMSMdriver::changeDutyCycle(dutyCycle);
+            PMACdriver::changeDutyCycle(dutyCycle);
         } else if (instruction == "stop") {
             cout << "[stop]" << endl;
-            PMSMdriver::disableDriver();
+            PMACdriver::disableDriver();
             dutyCycle = 0;
             speed = 0;
-            PMSMdriver::changeDutyCycle(dutyCycle);
+            PMACdriver::changeDutyCycle(dutyCycle);
         } else if (instruction == "ss") {
             cout << "[SetSpeed]" << endl;
             //cout << "Speed must be a float value between 0 and " << TOP_SPEED_DPS << endl;
@@ -122,10 +118,24 @@ void thread_SerialControl(void *argv) {
                 // This value will be taken by the other thread
                 // maybe I can implement another mechanism
             }
+        } else if (instruction == "sdc") {
+            cout << "[Set Duty Cycle]" << endl;
+            //cout << "Speed must be a float value between 0 and " << TOP_SPEED_DPS << endl;
+            float inDutyCycle;
+            cin >> inDutyCycle;
+            if ((inDutyCycle < .1) || (inDutyCycle > 1)) {
+                cout << "Duty cycle must be a float value between .1 and 1" << endl;
+            } else {
+                dutyCycle = inDutyCycle;
+                cout << "Duty cycle = " << dutyCycle << endl;
+                PMACdriver::changeDutyCycle(dutyCycle);
+                // This value will be taken by the other thread
+                // maybe I can implement another mechanism
+            }
         } else if (instruction == "gs") {
             cout << "[GetSpeed]" << endl;
-            cout << "Speed = " << PMSMdriver::getSpeed(0) << " DPS"
-                    << " = " << PMSMdriver::getSpeed(1) << " RPM" << endl;
+            cout << "Speed = " << PMACdriver::getSpeed(0) << " DPS"
+                    << " = " << PMACdriver::getSpeed(1) << " RPM" << endl;
         } else if (instruction == "kp") {
             cout << "[Set Kp]" << endl;
             cout << "Kp = " << kp << " write new Kp" << endl;
@@ -163,7 +173,7 @@ void thread_1s_tick(void *argv) {
     }
 }
 
-void thread_PMSM_PID(void *argv) {
+void thread_PMAC_PID(void *argv) {
     //Run every second
     const int period = static_cast<int> (TICK_FREQ * 0.001);
     long long tick = getTick();
@@ -180,10 +190,10 @@ void thread_PMSM_PID(void *argv) {
     float dTerm = 0;
 
     while (1) {
-        if (PMSMdriver::getMotorStatus()) {
+        if (PMACdriver::getMotorStatus()) {
             err_1 = err_0; // store previous error value
             intErr_1 = intErr_0; // store previous integral error value
-            err_0 = (speed - PMSMdriver::getSpeed(0)) / TOP_SPEED_DPS; // get new error value
+            err_0 = (speed - PMACdriver::getSpeed(0)) / TOP_SPEED_DPS; // get new error value
             intErr_0 = intErr_1 + err_0;
             derErr = err_0 - err_1;
             pTerm = kp * err_0;
@@ -194,7 +204,7 @@ void thread_PMSM_PID(void *argv) {
             q = pTerm + iTerm + dTerm;
             dutyCycle += q;
             if (dutyCycle < .1) dutyCycle = .1;
-            PMSMdriver::changeDutyCycle(dutyCycle);
+            PMACdriver::changeDutyCycle(dutyCycle);
         }
         /*********************************************************************************/
         tick += period;
@@ -211,9 +221,9 @@ int main() {
     Thread *thread3;
     thread1 = Thread::create(thread_SerialControl, 2048, 2, NULL, Thread::DEFAULT);
     thread2 = Thread::create(thread_1s_tick, 2048, 3, NULL, Thread::DEFAULT);
-    thread3 = Thread::create(thread_PMSM_PID, 2048, 1, NULL, Thread::DEFAULT);
+    thread3 = Thread::create(thread_PMAC_PID, 2048, 1, NULL, Thread::DEFAULT);
 
-    cout << "Permanent Magnet Synchronous Motor Driver" << endl;
+    cout << "Permanent Magnet Alternating Current Motor Driver" << endl;
 
     while (1) {
     }
