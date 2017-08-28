@@ -1,0 +1,15 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Problem statement}{section.1}% 2
+\BOOKMARK [2][-]{subsection.1.2}{Summary of the work}{section.1}% 3
+\BOOKMARK [1][-]{section.2}{Design and implementation}{}% 4
+\BOOKMARK [2][-]{subsection.2.1}{VESC Board}{section.2}% 5
+\BOOKMARK [2][-]{subsection.2.2}{Miosix Porting}{section.2}% 6
+\BOOKMARK [2][-]{subsection.2.3}{BLDC Motor Algorythm}{section.2}% 7
+\BOOKMARK [1][-]{section.3}{Experimental evaluation}{}% 8
+\BOOKMARK [2][-]{subsection.3.1}{Experimental setup}{section.3}% 9
+\BOOKMARK [2][-]{subsection.3.2}{Results}{section.3}% 10
+\BOOKMARK [1][-]{section.4}{Conclusions and Future Works}{}% 11
+\BOOKMARK [1][-]{section.5}{Attachments}{}% 12
+\BOOKMARK [2][-]{subsection.5.1}{VESC Board Schematic}{section.5}% 13
+\BOOKMARK [2][-]{subsection.5.2}{DRV8302 Schematic}{section.5}% 14
+\BOOKMARK [2][-]{subsection.5.3}{STM32F405 Summary}{section.5}% 15

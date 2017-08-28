@@ -1,0 +1,48 @@
+\begin{thebibliography}{1}
+
+\bibitem{MaxwellEqs}
+Daniel Fleish.
+\newblock {\em A Student's Guide to Maxwell's Equations}.
+\newblock Cambridge University Press, The Edinburgh Building, Cambridge CB2
+  8RU, UK, 2008.
+
+\bibitem{GhioniElecDrives}
+Massimo Ghioni.
+\newblock Introduction to electrical drives.
+
+\bibitem{VedderSite}
+Benjamin Vedder.
+\newblock Vesc: Open source esc.
+
+\bibitem{TIDRV8302}
+Texas Instruments.
+\newblock {\em Three Phase Pre-Driver with Dual Current Shunt Amplifiers and
+  Buck Regulator Hardware Controlled}, 2011.
+\newblock Rev. 1.
+
+\bibitem{BLDCMotorManual}
+Nanotec.
+\newblock {\em DB42S03 Brushless DC Motor Datasheet}, 2007.
+\newblock Rev. 1.
+
+\bibitem{STM32F405Datasheet}
+STMicroelectronics.
+\newblock {\em STM32F405xx and STM32F407xx Datasheet}, 2016.
+\newblock Rev. 8.
+
+\bibitem{GuoPMSMefficiency2016}
+Qingbo Guo.
+\newblock Maximum efficiency per torque control of permanent-magnet synchronous
+  machines.
+\newblock 2016.
+
+\bibitem{NIPID}
+National Instruments.
+\newblock {\em PID Theory Explained}, 2011.
+\newblock Rev. 1.
+
+\bibitem{MiosixSite}
+Federico Terraneo.
+\newblock Miosix.
+
+\end{thebibliography}
