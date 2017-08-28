@@ -1,0 +1,17 @@
+\select@language {english}
+\contentsline {section}{\numberline {1}Introduction}{3}
+\contentsline {subsection}{\numberline {1.1}Problem statement}{3}
+\contentsline {subsection}{\numberline {1.2}Summary of the work}{5}
+\contentsline {section}{\numberline {2}Design and implementation}{6}
+\contentsline {subsection}{\numberline {2.1}VESC Board}{6}
+\contentsline {subsection}{\numberline {2.2}BLDC Motor Drive Algorithm}{7}
+\contentsline {subsection}{\numberline {2.3}PID Controller}{10}
+\contentsline {subsection}{\numberline {2.4}Miosix Porting and Implementation of BLDC Driving and Control Algorithms}{11}
+\contentsline {section}{\numberline {3}Experimental evaluation}{15}
+\contentsline {subsection}{\numberline {3.1}Experimental setup}{15}
+\contentsline {subsection}{\numberline {3.2}Results}{16}
+\contentsline {section}{\numberline {4}Conclusions and Future Works}{21}
+\contentsline {section}{\numberline {5}Appendix}{22}
+\contentsline {subsection}{\numberline {5.1}Appendix A: VESC Board Schematic}{22}
+\contentsline {subsection}{\numberline {5.2}Appendix B: DB42S03 Datasheet}{23}
+\contentsline {subsection}{\numberline {5.3}Appendix C: LabView VI}{24}

@@ -17,10 +17,96 @@
 #include "miosix.h"
 
 #define PWM_RESOLUTION 100
+#define PMAC_PWM_FREQUENCY 25000
 #define CONTROL_TIMER_FREQUENCY 50000
 #define MOTOR_POLE_PAIRS 8
 #define CW 0
 #define CCW 1
+
+
+#ifndef ANTILIB_GPIO_H
+#define ANTILIB_GPIO_H
+
+#define GPIO_CNF_INPUT_ANALOG  0
+#define GPIO_CNF_INPUT_FLOATING  1
+#define GPIO_CNF_INPUT_PULLUPDOWN 2
+
+#define GPIO_CNF_OUTPUT_PUSHPULL 0
+#define GPIO_CNF_OUTPUT_OPENDRAIN 1
+#define GPIO_CNF_AFIO_PUSHPULL  2
+#define GPIO_CNF_AFIO_OPENDRAIN  3
+
+#define GPIO_MODE_INPUT    0
+#define GPIO_MODE_OUTPUT10MHz  1
+#define GPIO_MODE_OUTPUT2MHz  2
+#define GPIO_MODE_OUTPUT50MHz  3
+
+#define GPIOCONF(mode, cnf) ((cnf << 2) | (mode))
+#define GPIOPINCONFL(pin, conf) (conf << (pin * 4))
+#define GPIOPINCONFH(pin, conf) (conf << ((pin - 8) * 4))
+
+#define CONFMASKL(pin) ((u32)~(15 << (pin * 4)))
+#define CONFMASKH(pin) ((u32)~(15 << ((pin - 8) * 4)))
+
+#endif
+
+#ifndef ANTILIB_ADC_H
+#define ANTILIB_ADC_H
+
+#define SAMPLE_TIME_1_5  0
+#define SAMPLE_TIME_7_5  1
+#define SAMPLE_TIME_13_5 2
+#define SAMPLE_TIME_28_5 3
+#define SAMPLE_TIME_41_5 4
+#define SAMPLE_TIME_55_5 5
+#define SAMPLE_TIME_71_5 6
+#define SAMPLE_TIME_239_5 7
+
+
+#define ADC_SAMPLE_TIME0(x)   (x << 0)
+#define ADC_SAMPLE_TIME1(x)   (x << 3)
+#define ADC_SAMPLE_TIME2(x)   (x << 6)
+#define ADC_SAMPLE_TIME3(x)   (x << 9)
+#define ADC_SAMPLE_TIME4(x)   (x << 12)
+#define ADC_SAMPLE_TIME5(x)   (x << 15)
+#define ADC_SAMPLE_TIME6(x)   (x << 18)
+#define ADC_SAMPLE_TIME7(x)   (x << 21)
+#define ADC_SAMPLE_TIME8(x)   (x << 24)
+#define ADC_SAMPLE_TIME9(x)   (x << 27)
+
+#define ADC_SAMPLE_TIME10(x)  (x << 0)
+#define ADC_SAMPLE_TIME11(x)  (x << 3)
+#define ADC_SAMPLE_TIME12(x)  (x << 6)
+#define ADC_SAMPLE_TIME13(x)  (x << 9)
+#define ADC_SAMPLE_TIME14(x)  (x << 12)
+#define ADC_SAMPLE_TIME15(x)  (x << 15)
+#define ADC_SAMPLE_TIME16(x)  (x << 18)
+#define ADC_SAMPLE_TIME17(x)  (x << 21)
+
+
+#define ADC_SEQUENCE_LENGTH(x) (x << 20)
+
+// SQR3
+#define ADC_SEQ1(x)  (x << 0)
+#define ADC_SEQ2(x)  (x << 5)
+#define ADC_SEQ3(x)  (x << 10)
+#define ADC_SEQ4(x)  (x << 15)
+#define ADC_SEQ5(x)  (x << 20)
+#define ADC_SEQ6(x)  (x << 25)
+// SQR2
+#define ADC_SEQ7(x)  (x << 0)
+#define ADC_SEQ8(x)  (x << 5)
+#define ADC_SEQ9(x)  (x << 10)
+#define ADC_SEQ10(x)  (x << 15)
+#define ADC_SEQ11(x) (x << 20)
+#define ADC_SEQ12(x)  (x << 25)
+// SQR1
+#define ADC_SEQ13(x)  (x << 0)
+#define ADC_SEQ14(x)  (x << 5)
+#define ADC_SEQ15(x)  (x << 10)
+#define ADC_SEQ16(x) (x << 15)
+
+#endif
 
 namespace miosix {
 
@@ -84,12 +170,12 @@ namespace miosix {
          * so don't do it!
          */
         bool waitForCycleBegin();
-        
+
         /**
          * Set the output frequency. Only to be called with outputs stopped.
          * @param frequency in Hz
          */
-        static void setFrequency(unsigned int frequency);
+        static void setDrivingFrequency(unsigned int frequency);
 
         /**
          * Initialize the ports for the hall effect sensors
@@ -136,7 +222,7 @@ namespace miosix {
          * 
          */
         static void disableDriver();
-       
+
         /**
          * 
          * @param channel
@@ -151,35 +237,42 @@ namespace miosix {
         static void updateFaultFlag();
 
         /**
-        * 
-        * @return 
-        */
+         * 
+         * @return 
+         */
         static bool getFaultFlag();
-        
+
         /**
          * 
          * @param dutyCycle
          * @return 
          */
         static int trapezoidalDrive();
-        
+
         static void allGatesLow();
-        
+
         static void highSideGatesLow();
-        
+
         static void lowSideGatesLow();
-        
-        static void changeDutyCycle (float dutyCycle);
-        
-        static void changeDirection (float direction);
-        
-        static float getSpeed (char type);
-        
-        static void calculateSpeed ();
-        
+
+        static void changeDutyCycle(float dutyCycle);
+
+        static void changeDirection(float direction);
+
+        static float getSpeed(char type);
+
+        static void calculateSpeed();
+
         static char getMotorStatus();
         
-        static bool faultFlag;// = 0;  
+        static int getBatteryVoltage();
+        
+        static void setupTimer3(int frequency);
+        
+        static void dutyCycleTimer3(float dutyCycle);
+
+        static bool faultFlag; // = 0;  
+        
 
     private:
         PMACdriver(const PMACdriver&);
@@ -195,19 +288,25 @@ namespace miosix {
          * interrupts disabled
          */
         static void IRQwaitForTimerOverflow(FastInterruptDisableLock& dLock);
-        
-        
+
+
         /**
          * 
          * @param frequency
          */
         static void setupControlTimer(unsigned int frequency);
-        
+
         /**
          * 
          */
         static void setupADC();
-        
+
+        /**
+         * 
+         * @param frequency
+         */
+        static void setupADCTimer();
+
         FastMutex mutex; ///< Mutex to protect from concurrent access
 
 

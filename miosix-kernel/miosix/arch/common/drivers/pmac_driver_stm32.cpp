@@ -43,6 +43,15 @@ typedef Gpio<GPIOC_BASE, 11> hallSensor3;
 typedef Gpio<GPIOC_BASE, 10> enableGate;
 typedef Gpio<GPIOC_BASE, 12> faultPin; // TODO: implement monitor and handler for this signal
 
+typedef Gpio<GPIOA_BASE, 0> phaseVoltage3_ADC; // ADC channel 0
+typedef Gpio<GPIOA_BASE, 1> phaseVoltage2_ADC; // ADC channel 1
+typedef Gpio<GPIOA_BASE, 2> phaseVoltage1_ADC; // ADC channel 2
+typedef Gpio<GPIOA_BASE, 3> boardTemperature_ADC; // ADC channel 3
+typedef Gpio<GPIOB_BASE, 0> currentSense2_ADC; // ADC channel 8
+typedef Gpio<GPIOB_BASE, 1> currentSense1_ADC; // ADC channel 9
+typedef Gpio<GPIOC_BASE, 0> motorTemperature_ADC; // ADC channel 10
+// typedef Gpio<GPIOC_BASE, 1> externalAnalogSignal_ADC;   // ADC channel 12
+
 static Thread *waiting = 0;
 
 char hallEffectSensors_newPosition = 0;
@@ -54,6 +63,8 @@ int speedCounter = 0;
 float speedDPS = 0;
 float speedRPM = 0;
 bool motorRunning = 0;
+
+bool LED_flag = 0;
 
 /**
  * Timer 1 interrupt handler actual implementation
@@ -82,12 +93,8 @@ void __attribute__ ((naked)) TIM1_CC_IRQHandler() {
  */
 
 void __attribute__ ((used)) tim2impl() {
-    /* The code of the interrupt handler goes from here...*/
-
     TIM2->SR = 0; // Clear interrupt flags
     if (PMACdriver::getMotorStatus()) PMACdriver::trapezoidalDrive();
-
-    /*... to here*/
 
     if (waiting == 0) return;
     waiting->IRQwakeup();
@@ -126,6 +133,65 @@ void __attribute__ ((naked)) TIM3_IRQHandler() {
     restoreContext();
 }
 
+/**
+ * Timer 8 interrupt handler actual implementation
+ */
+void __attribute__ ((used)) tim8impl() {
+    TIM8->SR = 0; // Clear interrupt flags
+        if (LED_flag == 0) {
+            pwmSignal0::high();
+            LED_flag = 1;
+        } else {
+            pwmSignal0::low();
+            LED_flag = 0;
+        }
+    if (waiting == 0) return;
+    waiting->IRQwakeup();
+    if (waiting->IRQgetPriority() > Thread::IRQgetCurrentThread()->IRQgetPriority())
+        Scheduler::IRQfindNextThread();
+    waiting = 0;
+}
+
+/**
+ * Timer 8 interrupt handler
+ */
+void __attribute__ ((naked)) TIM8_CC_IRQHandler() {
+    saveContext();
+    asm volatile("bl _Z8tim8implv");
+    restoreContext();
+}
+
+/**
+ * ADC 1 interrupt handler actual implementation
+ */
+void __attribute__ ((used)) adcimpl() {
+    //ADC1->SR = 0; // Clear interrupt flags
+    if (ADC1->SR & ADC_SR_EOC) {
+        if (LED_flag == 0) {
+            redLED_on();
+            LED_flag = 1;
+        } else {
+            redLED_off();
+            LED_flag = 0;
+        }
+    }
+
+    if (waiting == 0) return;
+    waiting->IRQwakeup();
+    if (waiting->IRQgetPriority() > Thread::IRQgetCurrentThread()->IRQgetPriority())
+        Scheduler::IRQfindNextThread();
+    waiting = 0;
+}
+
+/**
+ * ADC 1 interrupt handler
+ */
+void __attribute__ ((naked)) ADC_IRQHandler() {
+    saveContext();
+    asm volatile("bl _Z7adcimplv");
+    restoreContext();
+}
+
 namespace miosix {
 
     //
@@ -147,23 +213,19 @@ namespace miosix {
             RCC->APB1ENR |= RCC_APB1ENR_TIM3EN; // Servo motor drive
             RCC->APB2ENR |= RCC_APB2ENR_TIM1EN; // PMAC drive
             RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; // Control PMAC
+            RCC->APB2ENR |= RCC_APB2ENR_TIM8EN; // Timer for ADC Sampling
+            RCC->APB2ENR |= RCC_APB2ENR_ADC1EN; // ADC Clock
+            RCC->APB2ENR |= RCC_APB2ENR_ADC2EN; // ADC Clock
+            RCC->APB2ENR |= RCC_APB2ENR_ADC3EN; // ADC Clock
+            //RCC->AHBENR |= RCC_AHBENR_DMA1EN;   // DMA Clock
             RCC_SYNC();
         }
-
-        // Configure timer 3
-        TIM3->CR1 = 0;
-        TIM3->CCR2 = 0;
 
         // Configure timer 1
         TIM1->CR1 = 0; // Control Register 1 = 0, reset everything related to this timer
         TIM1->CCR1 = 0; // Capture Compare register = 0, 
         TIM1->CCR2 = 0;
         TIM1->CCR3 = 0;
-
-        // Configure interrupt on timer 3 overflow
-        TIM3->DIER = TIM_DIER_UIE;
-        NVIC_SetPriority(TIM3_IRQn, 16); //Low priority for timer IRQ
-        NVIC_EnableIRQ(TIM3_IRQn);
 
         // Configure interrupt on timer 1 overflow
         TIM1->DIER = TIM_DIER_UIE | TIM_DIER_CC1IE | TIM_DIER_CC2IE | TIM_DIER_CC3IE;
@@ -176,37 +238,21 @@ namespace miosix {
         faultPin::mode(Mode::INPUT); // Doesn't have a handler yet
         disableDriver(); // Must be enabled later to drive the power MOS gates
         setupControlTimer(CONTROL_TIMER_FREQUENCY);
-        
-        
-        
-        /**
-         * Vedder configuration of the timers:
-         * RCC->APB2ENR |= RCC_APB2ENR_TIM1EN; // PMAC drive
-         * TIM1->PSC = 0;
-         * TIM1->CR1 |= TIM_CCMR1_CC1S_1; // compare flag when upcounting
-	 * TIM_TimeBaseStructure.TIM_Period = SYSTEM_CORE_CLOCK / (int)m_conf->foc_f_sw;
-	 * TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-	 * TIM_TimeBaseStructure.TIM_RepetitionCounter = 1; // Only generate update event on underflow
-         */
+        setupADC();
+        setupADCTimer();    // Timer 8
+        //setupTimer3(1000);
+        //dutyCycleTimer3(.1);
+        pwmSignal0::mode(Mode::OUTPUT);
     }
 
-    void PMACdriver::setFrequency(unsigned int PWM_frequency) {
+    void PMACdriver::setDrivingFrequency(unsigned int PWM_frequency) {
         //Lock<FastMutex> l(mutex);
         //if (status != STOPPED) return; // If timer enabled ignore the call
 
-        uint32_t TIMER_Frequency = SystemCoreClock / 2; // From the data sheet
+        uint32_t TIMER_Frequency = SystemCoreClock; // From the data sheet
         uint32_t COUNTER_Frequency = PWM_RESOLUTION * PWM_frequency; // How many steps inside a Period
         uint32_t PSC_Value = (TIMER_Frequency / COUNTER_Frequency) - 1; // Pre-scaler
         uint16_t ARR_Value = PWM_RESOLUTION - 1; // Top value to count to
-
-        TIM3->PSC = PSC_Value;
-        TIM3->ARR = ARR_Value;
-
-        /*In case that timers have different clock sources, use different configurations*/
-        TIMER_Frequency = SystemCoreClock; // From the data sheet
-        COUNTER_Frequency = PWM_RESOLUTION * PWM_frequency; // How many steps inside a Period
-        PSC_Value = (TIMER_Frequency / COUNTER_Frequency) - 1; // Pre-scaler
-        ARR_Value = PWM_RESOLUTION - 1; // Top value to count to
 
         TIM1->PSC = PSC_Value;
         TIM1->ARR = ARR_Value;
@@ -232,22 +278,23 @@ namespace miosix {
              *              TIM_CCER_CCxE
              */
 
-            TIM3->CCMR1 |= TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2PE;
-            TIM3->CCER |= TIM_CCER_CC2E;
-            pwmSignal0::alternateFunction(2);
-            pwmSignal0::mode(Mode::ALTERNATE);
-
-            TIM1->CCMR1 |= TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1PE;
+            TIM1->CCMR1 |= TIM_CCMR1_OC1M_2 
+                    | TIM_CCMR1_OC1M_1 
+                    | TIM_CCMR1_OC1PE;
             TIM1->CCER |= TIM_CCER_CC1E;
             pwmSignalH3::alternateFunction(1);
             pwmSignalH3::mode(Mode::ALTERNATE);
 
-            TIM1->CCMR1 |= TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2PE;
+            TIM1->CCMR1 |= TIM_CCMR1_OC2M_2 
+                    | TIM_CCMR1_OC2M_1 
+                    | TIM_CCMR1_OC2PE;
             TIM1->CCER |= TIM_CCER_CC2E;
             pwmSignalH2::alternateFunction(1);
             pwmSignalH2::mode(Mode::ALTERNATE);
 
-            TIM1->CCMR2 |= TIM_CCMR2_OC3M_2 | TIM_CCMR2_OC3M_1 | TIM_CCMR2_OC3PE;
+            TIM1->CCMR2 |= TIM_CCMR2_OC3M_2 
+                    | TIM_CCMR2_OC3M_1 
+                    | TIM_CCMR2_OC3PE;
             TIM1->CCER |= TIM_CCER_CC3E;
             pwmSignalH1::alternateFunction(1);
             pwmSignalH1::mode(Mode::ALTERNATE);
@@ -274,9 +321,7 @@ namespace miosix {
             // between threads on the STM32, so we disable interrupts
 
             disableDriver();
-
-            pwmSignal0::mode(Mode::INPUT);
-            TIM3->CCER &= ~TIM_CCER_CC2E;
+            
             pwmSignalH1::mode(Mode::INPUT);
             TIM1->CCER &= ~TIM_CCER_CC1E;
             pwmSignalH2::mode(Mode::INPUT);
@@ -301,9 +346,6 @@ namespace miosix {
         // While status is starting neither member function callable with timer
         // started nor stopped are allowed
         //status = STARTED;
-        TIM3->CNT = 0;
-        TIM3->EGR = TIM_EGR_UG;
-        TIM3->CR1 = TIM_CR1_CEN;
 
         TIM1->CNT = 0; // Start counter value from 0
         TIM1->EGR = TIM_EGR_UG; // Event Generation Register = Update generation
@@ -316,7 +358,7 @@ namespace miosix {
         //if (status != STARTED) return; // If timer disabled ignore the call
         //status = STOPPED;
         // Erase the value in the capture/compare registers
-        TIM3->CCR2 = 0;
+        //TIM3->CCR2 = 0;
         TIM1->CCR1 = 0;
         TIM1->CCR2 = 0;
         TIM1->CCR3 = 0;
@@ -327,7 +369,7 @@ namespace miosix {
             IRQwaitForTimerOverflow(dLock);
         }
         // Disable the timers completely
-        TIM3->CR1 = 0;
+        //TIM3->CR1 = 0;
         TIM1->CR1 = 0;
     }
 
@@ -335,9 +377,6 @@ namespace miosix {
         //Lock<FastMutex> l(mutex);
         //if (status != STARTED) return; // If timer disabled ignore the call
         switch (channel) {
-            case 0:
-                TIM3->CCR2 = pulseWidth * PWM_RESOLUTION;
-                break;
             case 1:
                 TIM1->CCR3 = pulseWidth * PWM_RESOLUTION;
                 break;
@@ -467,25 +506,25 @@ namespace miosix {
         }
     }
 
-    void PMACdriver::allGatesLow(){
+    void PMACdriver::allGatesLow() {
         highSideGatesLow();
         lowSideGatesLow();
     }
-    
-    void PMACdriver::highSideGatesLow(){
+
+    void PMACdriver::highSideGatesLow() {
         setHighSideWidth(1, 0);
         setHighSideWidth(2, 0);
         setHighSideWidth(3, 0);
     }
 
-    void PMACdriver::lowSideGatesLow(){
+    void PMACdriver::lowSideGatesLow() {
         setLowSide(1, 0);
         setLowSide(2, 0);
         setLowSide(3, 0);
     }
 
     void PMACdriver::setupControlTimer(unsigned int frequency) {
-        // Initialize Timer 2 to apply the trapezoidal drive @ 80kHz
+        // Initialize Timer 2 to apply the trapezoidal drive @ 50kHz
         TIM2->CR1 = 0;
         TIM2->DIER = TIM_DIER_UIE;
         TIM2->EGR = TIM_EGR_UG;
@@ -501,6 +540,107 @@ namespace miosix {
         TIM2->ARR = ARR_Value;
         TIM2->CNT = 0;
         TIM2->CR1 = TIM_CR1_CEN;
+    }
+
+    void PMACdriver::setupADCTimer() {
+        TIM8->CR1 = 0; // Erase Control Register 1 to set it up
+        TIM8->DIER = TIM_DIER_UIE; // DMA/interrupt enable register: Update interrupt enable
+        TIM8->DIER = TIM_DIER_UIE | TIM_DIER_CC1IE | TIM_DIER_CC2IE;
+        NVIC_SetPriority(TIM8_CC_IRQn, 17); //Low priority for timer IRQ
+        NVIC_EnableIRQ(TIM8_CC_IRQn);
+        // capture/compare register 1:         
+        TIM8->CCMR1 |= TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1PE;
+        TIM8->CCER |= TIM_CCER_CC1E;
+
+        TIM8->CCMR1 |= TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2PE;
+        TIM8->CCER |= TIM_CCER_CC2E;
+
+        uint32_t TIMER_Frequency = SystemCoreClock; // From the data sheet
+        uint32_t COUNTER_Frequency = PWM_RESOLUTION * PMAC_PWM_FREQUENCY/10; // How many steps inside a Period
+        uint32_t PSC_Value = (TIMER_Frequency / COUNTER_Frequency) - 1; // Pre-scaler
+        uint16_t ARR_Value = PWM_RESOLUTION - 1; // Top value to count to
+        TIM8->PSC = PSC_Value;
+        TIM8->ARR = ARR_Value;
+
+        // TIM1 Master and TIM8 slave
+        TIM1->CR2 |= TIM_CR2_MMS_1;
+        TIM1->SMCR |= TIM_SMCR_MSM;
+        // TIM8->SMCR |= 0; //TIM_TS_ITR0;
+        TIM8->SMCR |= TIM_SMCR_SMS_2;
+
+        TIM8->CNT = 0; // Start counter value from 0
+        TIM8->EGR = TIM_EGR_UG; // Event Generation Register = Update generation
+        TIM8->BDTR = TIM_BDTR_MOE; // Advanced timers need to have the main output enabled after CCxE is set
+        TIM8->CR1 = TIM_CR1_CEN; // Counter Register 1 = Counter Enable
+        
+        TIM8->CCR2 = .1 * PWM_RESOLUTION;
+
+    }
+
+    void PMACdriver::setupADC() {
+        // http://en.radzio.dxp.pl/stm32vldiscovery/lesson9,adc,with,direct,memory,access,dma.html
+
+        // uint16_t AIN[4]; // 4 locations
+
+        phaseVoltage3_ADC::mode(Mode::INPUT_ANALOG); // ADC channel 0
+        phaseVoltage2_ADC::mode(Mode::INPUT_ANALOG); // ADC channel 1
+        phaseVoltage1_ADC::mode(Mode::INPUT_ANALOG); // ADC channel 2
+        boardTemperature_ADC::mode(Mode::INPUT_ANALOG); // ADC channel 3
+        currentSense2_ADC::mode(Mode::INPUT_ANALOG); // ADC channel 8
+        currentSense1_ADC::mode(Mode::INPUT_ANALOG); // ADC channel 9
+        motorTemperature_ADC::mode(Mode::INPUT_ANALOG); // ADC channel 10
+        // externalAnalogSignal_ADC::mode(Mode::INPUT_ANALOG);   // ADC channel 12
+
+
+        ADC1->CR2 = ADC_CR2_ADON | // turn on ADC 
+                ADC_CR2_CONT | // enable continuos mode
+                ADC_CR2_DMA; // enable DMA mode
+        ADC1->CR1 = ADC_CR1_SCAN; // enable scan mode
+
+        //ADC1->SMPR2 = ADC_SMPR2_SMP3_0; //Sample for 15 cycles channel 3 (temperature)
+        //ADC1->SQR1 = 0; //Do only one conversion
+        //ADC1->SQR2 = 0;
+        //ADC1->SQR3 = ADC_SQR3_SQ1_3; //Convert channel 2 (battery voltage)
+
+        ADC1->SQR1 = ADC_SEQUENCE_LENGTH(3); // four channels in sequence
+        ADC1->SQR3 = ADC_SEQ1(0) | // channel 0 is first in sequence
+                ADC_SEQ2(1) | // channel 1 is second in sequence
+                ADC_SEQ3(2) | // channel 2 is third in sequence
+                ADC_SEQ4(3); // channel 3 is fourth in sequence
+        ADC1->SMPR2 = ADC_SAMPLE_TIME0(SAMPLE_TIME_239_5) | // sample time for first channel in sequence
+                ADC_SAMPLE_TIME1(SAMPLE_TIME_239_5) | // sample time for second channel in sequence
+                ADC_SAMPLE_TIME2(SAMPLE_TIME_239_5) | // sample time for third channel in sequence
+                ADC_SAMPLE_TIME3(SAMPLE_TIME_239_5); // sample time for fourth channel in sequence
+
+        // DMA setup
+
+        /*DMA1_Channel1->CPAR  = (uint32_t)(&(ADC1->DR));	// peripheral (source) address
+        DMA1_Channel1->CMAR  = (uint32_t)AIN;	          // memory (desination) address
+        DMA1_Channel1->CNDTR = 4;	                      // 4 transfers
+
+        DMA1_Channel1->CCR |= DMA_CCR1_CIRC |    // circular mode enable
+                              DMA_CCR1_MINC |    // memory increment mode enable
+                              DMA_CCR1_MSIZE_0 | // memory size 16 bits
+                              DMA_CCR1_PSIZE_0;  // peripheral size 16 bits
+
+        DMA1_Channel1->CCR |= DMA_CCR1_EN ;	// Enable channel*/
+    }
+
+    int PMACdriver::getBatteryVoltage() {
+        if (LED_flag == 0) {
+            redLED_on();
+            LED_flag = 1;
+        } else {
+            redLED_off();
+            LED_flag = 0;
+        }
+        ADC1->CR2 = ADC_CR2_ADON; //Turn ADC ON
+        Thread::sleep(5); //Wait for voltage to stabilize
+        ADC1->CR2 |= ADC_CR2_SWSTART; //Start conversion
+        while ((ADC1->SR & ADC_SR_EOC) == 0); //Wait for conversion
+        int result = ADC1->DR; //Read result
+        ADC1->CR2 = 0; //Turn ADC OFF
+        return result;
     }
 
     void PMACdriver::changeDutyCycle(float dutyCycle) {
@@ -531,14 +671,43 @@ namespace miosix {
         else return 0;
     }
 
-    char PMACdriver::getMotorStatus(){
+    char PMACdriver::getMotorStatus() {
         return motorRunning;
     }
-    
-    void PMACdriver::setupADC(){
+
+    void PMACdriver::setupTimer3(int frequency) {
+        // Configure timer 3
+        TIM3->CR1 = 0;
+        TIM3->CCR2 = 0;
+        // Configure interrupt on timer 3 overflow
+        TIM3->DIER = TIM_DIER_UIE;
+        NVIC_SetPriority(TIM3_IRQn, 16); //Low priority for timer IRQ
+        NVIC_EnableIRQ(TIM3_IRQn);
         
+        uint32_t TIMER_Frequency = SystemCoreClock / 2; // From the data sheet
+        uint32_t COUNTER_Frequency = PWM_RESOLUTION * frequency; // How many steps inside a Period
+        uint32_t PSC_Value = (TIMER_Frequency / COUNTER_Frequency) - 1; // Pre-scaler
+        uint16_t ARR_Value = PWM_RESOLUTION - 1; // Top value to count to
+
+        TIM3->PSC = PSC_Value;
+        TIM3->ARR = ARR_Value;
+        
+        
+        TIM3->CCMR1 |= TIM_CCMR1_OC2M_2 | TIM_CCMR1_OC2M_1 | TIM_CCMR1_OC2PE;
+        TIM3->CCER |= TIM_CCER_CC2E;
+        pwmSignal0::alternateFunction(2);
+        pwmSignal0::mode(Mode::ALTERNATE);
+        
+        // Start Timer 3 PWM
+        TIM3->CNT = 0;
+        TIM3->EGR = TIM_EGR_UG;
+        TIM3->CR1 = TIM_CR1_CEN;
     }
-    
+
+    void PMACdriver::dutyCycleTimer3(float dutyCycle) {
+        TIM3->CCR2 = dutyCycle * PWM_RESOLUTION;
+    }
+
     void PMACdriver::IRQwaitForTimerOverflow(FastInterruptDisableLock& dLock) {
         waiting = Thread::IRQgetCurrentThread();
         do {

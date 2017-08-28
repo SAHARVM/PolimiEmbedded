@@ -5,7 +5,7 @@
 #include <string.h>
 #include "drivers/pmac_driver_stm32.h"
 
-#define PMAC_PWM_FREQUENCY 15000
+
 #define TOP_SPEED_DPS 40000
 
 #define DEFAULT_KP 0.01
@@ -32,7 +32,7 @@ void thread_SerialControl(void *argv) {
     long long tick = getTick();
 
     PMACdriver::instance();
-    PMACdriver::setFrequency(PMAC_PWM_FREQUENCY);
+    PMACdriver::setDrivingFrequency(PMAC_PWM_FREQUENCY);
     PMACdriver::enable();
     PMACdriver::start();
 
@@ -151,6 +151,9 @@ void thread_SerialControl(void *argv) {
             cout << "Kd = " << kd << " write new Kd" << endl;
             cin >> kd;
             cout << "New Kd = " << kd << endl;
+        } else if (instruction == "gv") {
+            cout << "[GetVoltage]" << endl;
+            cout << "Voltage = " << PMACdriver::getBatteryVoltage() << "V" << endl;
         }
 #endif 
         tick += period;
@@ -221,7 +224,7 @@ int main() {
     Thread *thread3;
     thread1 = Thread::create(thread_SerialControl, 2048, 2, NULL, Thread::DEFAULT);
     thread2 = Thread::create(thread_1s_tick, 2048, 3, NULL, Thread::DEFAULT);
-    thread3 = Thread::create(thread_PMAC_PID, 2048, 1, NULL, Thread::DEFAULT);
+    // thread3 = Thread::create(thread_PMAC_PID, 2048, 1, NULL, Thread::DEFAULT);
 
     cout << "Permanent Magnet Alternating Current Motor Driver" << endl;
 

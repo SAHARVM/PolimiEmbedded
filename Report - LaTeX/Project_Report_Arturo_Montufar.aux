@@ -1,0 +1,105 @@
+\relax 
+\providecommand*\new@tpo@label[2]{}
+\providecommand \oddpage@label [2]{}
+\select@language{english}
+\@writefile{toc}{\select@language{english}}
+\@writefile{lof}{\select@language{english}}
+\@writefile{lot}{\select@language{english}}
+\citation{MaxwellEqs}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Problem statement}{3}}
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:LorentzDiagram_a}{{1a}{4}}
+\newlabel{sub@fig:LorentzDiagram_a}{{a}{4}}
+\newlabel{fig:LorentzDiagram_b}{{1b}{4}}
+\newlabel{sub@fig:LorentzDiagram_b}{{b}{4}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Torque on a conducting wire loop inside a magnetic field.\relax }}{4}}
+\newlabel{fig:Lorentz_diagrams}{{1}{4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Summary of the work}{5}}
+\citation{GhioniElecDrives}
+\citation{VedderSite}
+\citation{TIDRV8302}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Design and implementation}{6}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}VESC Board}{6}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Main components of an electric drive.\relax }}{6}}
+\newlabel{fig:Electric_Drive}{{2}{6}}
+\citation{TIDRV8302}
+\citation{BLDCMotorManual}
+\citation{STM32F405Datasheet}
+\citation{MaxwellEqs}
+\citation{GuoPMSMefficiency2016}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces DRV8302 Simplified Application Schematic\relax }}{7}}
+\newlabel{fig:DRV8302_simpSch}{{3}{7}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}BLDC Motor Drive Algorithm}{7}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Assembly details of a typical PMAC motor.\relax }}{8}}
+\newlabel{fig:PMAC_assembly}{{4}{8}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Three phase inverter consisting in 3 half-bridge inverters.\relax }}{8}}
+\newlabel{fig:BLDC_Inverter}{{5}{8}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Sequence for rotating the motor\relax }}{9}}
+\newlabel{tab:drive_sequence}{{1}{9}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces At every 60 electrical degrees of rotation of the rotor's magnetic field, there is a change in the state of the Hall effect sensors.\relax }}{9}}
+\newlabel{fig:BLDC_pulses_sequence}{{6}{9}}
+\citation{GhioniElecDrives}
+\citation{NIPID}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}PID Controller}{10}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Block diagram of a basic PID control algorithm\relax }}{10}}
+\newlabel{fig:PID_block_diagram}{{7}{10}}
+\citation{MiosixSite}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Miosix Porting and Implementation of BLDC Driving and Control Algorithms}{11}}
+\citation{STM32F405Datasheet}
+\citation{BLDCMotorManual}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Experimental evaluation}{15}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Experimental setup}{15}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces Picture of the experimental setup\relax }}{15}}
+\newlabel{fig:VESC_1}{{8}{15}}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces Picture of the VESC Board connected to the external peripherals\relax }}{16}}
+\newlabel{fig:VESC_2}{{9}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces Screen shot of the visual interface implemented in LabView\relax }}{16}}
+\newlabel{fig:LabView}{{10}{16}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Results}{16}}
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces Voltage Signal obtained applying a 10\% duty cycle\relax }}{17}}
+\newlabel{fig:dutycycle_10}{{11}{17}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Voltage Signal obtained applying a 50\% duty cycle\relax }}{17}}
+\newlabel{fig:dutycycle_50}{{12}{17}}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Voltage Signal obtained applying a 100\% duty cycle\relax }}{18}}
+\newlabel{fig:dutycycle_100}{{13}{18}}
+\@writefile{lof}{\contentsline {figure}{\numberline {14}{\ignorespaces Speed of the motor applying a step speed request with $K_P$ = 0.01, $K_I$ = 0.05 and $K_D$ = 0\relax }}{18}}
+\newlabel{fig:PID_2}{{14}{18}}
+\@writefile{lof}{\contentsline {figure}{\numberline {15}{\ignorespaces Speed of the motor applying a step speed request with $K_P$ = 0.005, $K_I$ = 0.05 and $K_D$ = 0\relax }}{19}}
+\newlabel{fig:PID_1}{{15}{19}}
+\@writefile{lof}{\contentsline {figure}{\numberline {16}{\ignorespaces Speed of the motor applying a step speed request with $K_P$ = 0.004, $K_I$ = 0.05 and $K_D$ = 0\relax }}{19}}
+\newlabel{fig:PID_9}{{16}{19}}
+\@writefile{lof}{\contentsline {figure}{\numberline {17}{\ignorespaces Speed of the motor applying a step speed request with $K_P$ = 0.05, $K_I$ = 0.05 and $K_D$ = 0\relax }}{19}}
+\newlabel{fig:PID_3}{{17}{19}}
+\@writefile{lof}{\contentsline {figure}{\numberline {18}{\ignorespaces Speed of the motor applying a step speed request with $K_P$ = 0.005, $K_I$ = 0.001 and $K_D$ = 0\relax }}{19}}
+\newlabel{fig:PID_5}{{18}{19}}
+\@writefile{lof}{\contentsline {figure}{\numberline {19}{\ignorespaces Speed of the motor applying a step speed request with $K_P$ = 0.001, $K_I$ = 0.001 and $K_D$ = 0\relax }}{20}}
+\newlabel{fig:PID_7}{{19}{20}}
+\@writefile{lof}{\contentsline {figure}{\numberline {20}{\ignorespaces Speed of the motor applying a step speed request with $K_P$ = 0.001, $K_I$ = 0.01 and $K_D$ = 0\relax }}{20}}
+\newlabel{fig:PID_6}{{20}{20}}
+\@writefile{lof}{\contentsline {figure}{\numberline {21}{\ignorespaces Speed of the motor applying a step speed request with $K_P$ = 0.001, $K_I$ = 0.05 and $K_D$ = 0\relax }}{20}}
+\newlabel{fig:PID_8}{{21}{20}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Conclusions and Future Works}{21}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Appendix}{22}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Appendix A: VESC Board Schematic}{22}}
+\newlabel{fig:VESC_SCH}{{\caption@xref {fig:VESC_SCH}{ on input line 417}}{22}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Appendix B: DB42S03 Datasheet}{23}}
+\newlabel{fig:motorDS}{{\caption@xref {fig:motorDS}{ on input line 426}}{23}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Appendix C: LabView VI}{24}}
+\newlabel{fig:VI_1}{{\caption@xref {fig:VI_1}{ on input line 434}}{24}}
+\newlabel{fig:VI_2}{{\caption@xref {fig:VI_2}{ on input line 440}}{24}}
+\newlabel{fig:VI_3}{{\caption@xref {fig:VI_3}{ on input line 446}}{24}}
+\newlabel{fig:VI_4}{{\caption@xref {fig:VI_4}{ on input line 452}}{24}}
+\bibstyle{unsrt}
+\bibdata{text/project_bibliography}
+\bibcite{MaxwellEqs}{1}
+\bibcite{GhioniElecDrives}{2}
+\bibcite{VedderSite}{3}
+\bibcite{TIDRV8302}{4}
+\bibcite{BLDCMotorManual}{5}
+\bibcite{STM32F405Datasheet}{6}
+\bibcite{GuoPMSMefficiency2016}{7}
+\bibcite{NIPID}{8}
+\bibcite{MiosixSite}{9}
+\global\@namedef{scr@dte@section@lastmaxnumwidth}{12.62068pt}
+\global\@namedef{scr@dte@subsection@lastmaxnumwidth}{20.62083pt}
