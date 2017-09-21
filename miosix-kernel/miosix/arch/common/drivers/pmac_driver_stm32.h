@@ -5,37 +5,58 @@
  */
 
 /* 
- * File:   pmsm_drive_stm32.h
+ * File:   pmac_driver_stm32.h
  * Author: Arturo
  *
  * Created on 5 de agosto de 2017, 09:11 PM
  */
 
-#ifndef PMSM_DRIVE_STM32_H
-#define PMSM_DRIVE_STM32_H
+#ifndef PMAC_DRIVER_STM32_H
+#define PMAC_DRIVER_STM32_H
 
 #include "miosix.h"
 
+
+
 #define PWM_RESOLUTION 100
+#define PMAC_PWM_FREQUENCY 15000 // 25000
 #define CONTROL_TIMER_FREQUENCY 50000
-#define MOTOR_POLE_PAIRS 8
+//#ifdef MOTOR_HUBMOTOR
+#define MOTOR_POLE_PAIRS 10
+//#else
+//#define MOTOR_POLE_PAIRS 8  // 10 in the vehicle's wheels, 8 in the test motor
+//#endif
 #define CW 0
 #define CCW 1
+
+#define THERMISTOR_B_VALUE 3380
+
+// ADC start address = 0x4001 2000
+// ADC1 offset address is 0x000
+// ADC2 offset address is 0x100
+// ADC3 offset address is 0x200
+// ADC_DR offset address is 0x4C
+// ADC1_DR_Address should be 0x4001 2000 + 0x000 + 0x4C = 0x4001 204C
+#define ADC1_DR_Address    ((uint32_t)0x4001204C)
+
+/* Interrupts priority table */
+#define ADC_IRQN_PRIORITY 19
+#define DMA_IRQN_PRIORITY 20
 
 namespace miosix {
 
     /**
-     * This class is designed to drive a Permanent Magnet Synchronous Machine (PMSM)
+     * This class is designed to drive a Permanent Magnet Synchronous Machine (PMAC)
      * by generating 3 PWM signals that are managed by a specific control method
      * This class also handles:
-     *  -Signals to work with Texas Instruments PMSM driver DRV8302
+     *  -Signals to work with Texas Instruments PMAC driver DRV8302
      *  -ADC signals
      *  -Hall effect sensors signals
      *  -Absolute position encoder (later)
      *  -CAN
      *  -etc...
      */
-    class PMSMdriver {
+    class PMACdriver {
     public:
         /**
          * \return an instance of the SynchronizedServo class (singleton)
@@ -43,7 +64,7 @@ namespace miosix {
          * enable at least one channel call start() and setPosition() before the
          * servo driving waveforms will be generated.
          */
-        static PMSMdriver& instance();
+        static PMACdriver& instance();
 
         /**
          * Enable a channel. Can only be called with the outputs stopped. Even if
@@ -84,12 +105,12 @@ namespace miosix {
          * so don't do it!
          */
         bool waitForCycleBegin();
-        
+
         /**
          * Set the output frequency. Only to be called with outputs stopped.
          * @param frequency in Hz
          */
-        static void setFrequency(unsigned int frequency);
+        static void setDrivingFrequency(unsigned int frequency);
 
         /**
          * Initialize the ports for the hall effect sensors
@@ -136,7 +157,7 @@ namespace miosix {
          * 
          */
         static void disableDriver();
-       
+
         /**
          * 
          * @param channel
@@ -151,58 +172,86 @@ namespace miosix {
         static void updateFaultFlag();
 
         /**
-        * 
-        * @return 
-        */
+         * 
+         * @return 
+         */
         static bool getFaultFlag();
-        
+
         /**
          * 
          * @param dutyCycle
          * @return 
          */
         static int trapezoidalDrive();
-        
+
         static void allGatesLow();
-        
+
         static void highSideGatesLow();
-        
+
         static void lowSideGatesLow();
-        
-        static void changeDutyCycle (float dutyCycle);
-        
-        static void changeDirection (float direction);
-        
-        static float getSpeed (char type);
-        
-        static void calculateSpeed ();
-        
+
+        static void changeDutyCycle(float dutyCycle);
+
+        static void changeDirection(float direction);
+
+        static float getSpeed(char type);
+
+        static void calculateSpeed();
+
         static char getMotorStatus();
         
-        static bool faultFlag;// = 0;  
+        static void setupTimer3(int frequency);
+        
+        static void dutyCycleTimer3(float dutyCycle);
+        
+        static void setADCTriggerPosition(float dutyCycle);
+                
+        static int getADCvalue();
+        
+        static void changeTriggerPoint(float value);
+
+        static void setupSPI();
+        
+        static bool faultFlag; // = 0;
+        
+        
 
     private:
-        PMSMdriver(const PMSMdriver&);
-        PMSMdriver& operator=(const PMSMdriver&);
+        PMACdriver(const PMACdriver&);
+        PMACdriver& operator=(const PMACdriver&);
 
         /**
          * Constructor
          */
-        PMSMdriver();
+        PMACdriver();
 
         /**
          * Wait until the timer overflows from 0xffff to 0. Can only be called with
          * interrupts disabled
          */
         static void IRQwaitForTimerOverflow(FastInterruptDisableLock& dLock);
-        
-        
+
+
         /**
          * 
          * @param frequency
          */
         static void setupControlTimer(unsigned int frequency);
+
+        /**
+         * 
+         */
+        static void setupADC();
         
+        static void setupSimpleADC();
+        
+
+        /**
+         * 
+         * @param frequency
+         */
+        static void setupADCTimer();
+
         FastMutex mutex; ///< Mutex to protect from concurrent access
 
 
@@ -215,4 +264,4 @@ namespace miosix {
 } //namespace miosix
 
 
-#endif /* PMSM_DRIVE_STM32_H */
+#endif /* PMAC_DRIVER_STM32_H */
