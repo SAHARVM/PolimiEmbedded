@@ -16,16 +16,34 @@
 
 #include "miosix.h"
 
+#define SINUSOIDAL_DRIVE
+#define MOTOR_HUBMOTOR
+#define ROTOR_DIRECT_VECTOR_ANGULAR_SLIP (0.0)
 
 
-#define PWM_RESOLUTION 100
-#define PMAC_PWM_FREQUENCY 15000 // 25000
-#define CONTROL_TIMER_FREQUENCY 50000
-//#ifdef MOTOR_HUBMOTOR
-#define MOTOR_POLE_PAIRS 10
-//#else
-//#define MOTOR_POLE_PAIRS 8  // 10 in the vehicle's wheels, 8 in the test motor
-//#endif
+#ifdef SINUSOIDAL_DRIVE
+    #define CONTROL_TIMER_FREQUENCY 10000
+    #define PWM_RESOLUTION 100
+    #define PMAC_PWM_FREQUENCY 25000 // 25000
+#else
+    #define CONTROL_TIMER_FREQUENCY 50000
+    #define PWM_RESOLUTION 100
+    #define PMAC_PWM_FREQUENCY 15000 // 25000
+#endif // SINUSOIDAL_DRIVE
+
+#ifdef MOTOR_HUBMOTOR
+    #define MOTOR_POLE_PAIRS 10
+    #define MOTOR_PHASE_RESISTANCE 0.160
+    #define MOTOR_PHASE_INDUCTANCE .076
+    #define MOTOR_ELECTRICAL_CONSTANT 0.03775
+    #define DC_BUS 24   // Must be measured later
+#else
+    #define MOTOR_POLE_PAIRS 8
+    #define MOTOR_PHASE_RESISTANCE 0.1
+    #define MOTOR_PHASE_INDUCTANCE .05
+    #define MOTOR_ELECTRICAL_CONSTANT 0.05
+#endif
+
 #define CW 0
 #define CCW 1
 
@@ -37,11 +55,13 @@
 // ADC3 offset address is 0x200
 // ADC_DR offset address is 0x4C
 // ADC1_DR_Address should be 0x4001 2000 + 0x000 + 0x4C = 0x4001 204C
-#define ADC1_DR_Address    ((uint32_t)0x4001204C)
+//#define ADC1_DR_Address    ((uint32_t)0x4001204C)
 
 /* Interrupts priority table */
+#define TIM1_CC_IRQN_PRIORITY 14
 #define ADC_IRQN_PRIORITY 19
 #define DMA_IRQN_PRIORITY 20
+#define SPI1_IRQN_PRIORITY 21
 
 namespace miosix {
 
@@ -211,9 +231,22 @@ namespace miosix {
         static void changeTriggerPoint(float value);
 
         static void setupSPI();
+                
+        static float getElectricalAngularPosition();
+        
+        static float getMechanicalAngularPosition();
+        
+        static int sinusoidalDrive();
         
         static bool faultFlag; // = 0;
         
+        static float getShuntCurrent(char branch);
+        
+        static float getFOCvariables(char variable);
+        
+        static void setFOCvariables(char variable, float value);
+        
+        static void spaceVectorModulation_setTimes();
         
 
     private:
