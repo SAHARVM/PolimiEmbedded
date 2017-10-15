@@ -22,13 +22,13 @@
 
 
 #ifdef SINUSOIDAL_DRIVE
-    #define CONTROL_TIMER_FREQUENCY 10000
+    #define CONTROL_TIMER_FREQUENCY 5000
     #define PWM_RESOLUTION 100
-    #define PMAC_PWM_FREQUENCY 25000 // 25000
+    #define PMAC_PWM_FREQUENCY 25000
 #else
     #define CONTROL_TIMER_FREQUENCY 50000
     #define PWM_RESOLUTION 100
-    #define PMAC_PWM_FREQUENCY 15000 // 25000
+    #define PMAC_PWM_FREQUENCY 15000
 #endif // SINUSOIDAL_DRIVE
 
 #ifdef MOTOR_HUBMOTOR
@@ -58,10 +58,68 @@
 //#define ADC1_DR_Address    ((uint32_t)0x4001204C)
 
 /* Interrupts priority table */
-#define TIM1_CC_IRQN_PRIORITY 14
-#define ADC_IRQN_PRIORITY 19
-#define DMA_IRQN_PRIORITY 20
-#define SPI1_IRQN_PRIORITY 21
+//#define TIM1_CC_IRQN_PRIORITY   14
+#define TIM8_CC_IRQn_PRIORITY   21
+#define TIM2_IRQn_PRIORITY      16
+#define TIM3_IRQn_PRIORITY      17
+#define ADC_IRQN_PRIORITY       18
+#define DMA_IRQN_PRIORITY       19
+#define SPI1_IRQN_PRIORITY      20
+
+#define HMI_VAR_THETA               0
+#define HMI_VAR_I_Q_REF             1
+#define HMI_VAR_I_D_REF             2
+#define HMI_VAR_I_A                 3
+#define HMI_VAR_I_B                 4
+#define HMI_VAR_I_C                 5
+#define HMI_VAR_I_ALPHA             6
+#define HMI_VAR_I_BETA              7
+#define HMI_VAR_I_Q                 8
+#define HMI_VAR_I_D                 9
+#define HMI_VAR_I_Q_ERROR           10
+#define HMI_VAR_I_D_ERROR           11
+#define HMI_VAR_I_Q_INTEGRAL_ERROR  12
+#define HMI_VAR_I_D_INTEGRAL_ERROR  13
+#define HMI_VAR_PROPORTIONAL_Q      14
+#define HMI_VAR_PROPORTIONAL_D      15
+#define HMI_VAR_INTEGRAL_Q          16
+#define HMI_VAR_INTEGRAL_D          17
+#define HMI_VAR_V_Q                 18
+#define HMI_VAR_V_D                 19
+#define HMI_VAR_V_ALPHA             20
+#define HMI_VAR_V_BETA              21
+#define HMI_VAR_U_ALPHA             22
+#define HMI_VAR_U_BETA              23
+#define HMI_VAR_X                   24
+#define HMI_VAR_Y                   25
+#define HMI_VAR_Z                   26
+#define HMI_VAR_TIME_PHASE_A        27
+#define HMI_VAR_TIME_PHASE_B        28
+#define HMI_VAR_TIME_PHASE_C        29
+#define HMI_VAR_DUTY_CYCLE_A        30
+#define HMI_VAR_DUTY_CYCLE_B        31
+#define HMI_VAR_DUTY_CYCLE_C        32
+#define HMI_VAR_MOTOR_STATUS        33
+#define HMI_VAR_ANGULAR_SLIP        34
+#define HMI_VAR_KP_QUADRATURE       35
+#define HMI_VAR_KP_DIRECT           36
+#define HMI_VAR_KI_QUADRATURE       37
+#define HMI_VAR_KI_DIRECT           38
+#define HMI_VAR_DRV8302_FAULT_FLAG  39
+#define HMI_VAR_SPEED               40
+
+#define HMI_SET_VAR_I_Q_REF         1
+#define HMI_SET_VAR_I_D_REF         2
+#define HMI_SET_VAR_ANGULAR_SLIP    3
+#define HMI_SET_VAR_KP_QUADRATURE   4
+#define HMI_SET_VAR_KP_DIRECT       5
+#define HMI_SET_VAR_KI_QUADRATURE   6
+#define HMI_SET_VAR_KI_DIRECT       7
+
+
+
+
+
 
 namespace miosix {
 
@@ -195,7 +253,7 @@ namespace miosix {
          * 
          * @return 
          */
-        static bool getFaultFlag();
+        static char getFaultFlag();
 
         /**
          * 
@@ -224,21 +282,21 @@ namespace miosix {
         
         static void dutyCycleTimer3(float dutyCycle);
         
-        static void setADCTriggerPosition(float dutyCycle);
+        static void setADCTriggerPosition(char channel, float dutyCycle);
                 
         static int getADCvalue();
         
         static void changeTriggerPoint(float value);
 
         static void setupSPI();
-                
+        
+        static float updateElectricalAngularPosition();
+        
         static float getElectricalAngularPosition();
         
         static float getMechanicalAngularPosition();
         
-        static int sinusoidalDrive();
-        
-        static bool faultFlag; // = 0;
+        static int sinusoidalDrive(float theta);
         
         static float getShuntCurrent(char branch);
         
