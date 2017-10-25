@@ -6,7 +6,7 @@
 
 /* 
  * File:   pmac_driver_stm32.h
- * Author: Arturo
+ * Author: Arturo Montufar Arreola
  *
  * Created on 5 de agosto de 2017, 09:11 PM
  */
@@ -16,32 +16,31 @@
 
 #include "miosix.h"
 
-#define SINUSOIDAL_DRIVE
+//#define SINUSOIDAL_DRIVE
 #define MOTOR_HUBMOTOR
 #define ROTOR_DIRECT_VECTOR_ANGULAR_SLIP (0.0)
 
-
 #ifdef SINUSOIDAL_DRIVE
-    #define CONTROL_TIMER_FREQUENCY 5000
-    #define PWM_RESOLUTION 100
-    #define PMAC_PWM_FREQUENCY 25000
+#define CONTROL_TIMER_FREQUENCY 10000
+#define PWM_RESOLUTION 100
+#define PMAC_PWM_FREQUENCY 25000
 #else
-    #define CONTROL_TIMER_FREQUENCY 50000
-    #define PWM_RESOLUTION 100
-    #define PMAC_PWM_FREQUENCY 15000
+#define CONTROL_TIMER_FREQUENCY 50000
+#define PWM_RESOLUTION 100
+#define PMAC_PWM_FREQUENCY 15000
 #endif // SINUSOIDAL_DRIVE
 
 #ifdef MOTOR_HUBMOTOR
-    #define MOTOR_POLE_PAIRS 10
-    #define MOTOR_PHASE_RESISTANCE 0.160
-    #define MOTOR_PHASE_INDUCTANCE .076
-    #define MOTOR_ELECTRICAL_CONSTANT 0.03775
-    #define DC_BUS 24   // Must be measured later
+#define MOTOR_POLE_PAIRS 10
+#define MOTOR_PHASE_RESISTANCE 0.160
+#define MOTOR_PHASE_INDUCTANCE .076
+#define MOTOR_ELECTRICAL_CONSTANT 0.03775
+#define DC_BUS 24   // Must be measured later
 #else
-    #define MOTOR_POLE_PAIRS 8
-    #define MOTOR_PHASE_RESISTANCE 0.1
-    #define MOTOR_PHASE_INDUCTANCE .05
-    #define MOTOR_ELECTRICAL_CONSTANT 0.05
+#define MOTOR_POLE_PAIRS 8
+#define MOTOR_PHASE_RESISTANCE 0.1
+#define MOTOR_PHASE_INDUCTANCE .05
+#define MOTOR_ELECTRICAL_CONSTANT 0.05
 #endif
 
 #define CW 0
@@ -66,59 +65,57 @@
 #define DMA_IRQN_PRIORITY       19
 #define SPI1_IRQN_PRIORITY      20
 
-#define HMI_VAR_THETA               0
-#define HMI_VAR_I_Q_REF             1
-#define HMI_VAR_I_D_REF             2
-#define HMI_VAR_I_A                 3
-#define HMI_VAR_I_B                 4
-#define HMI_VAR_I_C                 5
-#define HMI_VAR_I_ALPHA             6
-#define HMI_VAR_I_BETA              7
-#define HMI_VAR_I_Q                 8
-#define HMI_VAR_I_D                 9
-#define HMI_VAR_I_Q_ERROR           10
-#define HMI_VAR_I_D_ERROR           11
-#define HMI_VAR_I_Q_INTEGRAL_ERROR  12
-#define HMI_VAR_I_D_INTEGRAL_ERROR  13
-#define HMI_VAR_PROPORTIONAL_Q      14
-#define HMI_VAR_PROPORTIONAL_D      15
-#define HMI_VAR_INTEGRAL_Q          16
-#define HMI_VAR_INTEGRAL_D          17
-#define HMI_VAR_V_Q                 18
-#define HMI_VAR_V_D                 19
-#define HMI_VAR_V_ALPHA             20
-#define HMI_VAR_V_BETA              21
-#define HMI_VAR_U_ALPHA             22
-#define HMI_VAR_U_BETA              23
-#define HMI_VAR_X                   24
-#define HMI_VAR_Y                   25
-#define HMI_VAR_Z                   26
-#define HMI_VAR_TIME_PHASE_A        27
-#define HMI_VAR_TIME_PHASE_B        28
-#define HMI_VAR_TIME_PHASE_C        29
-#define HMI_VAR_DUTY_CYCLE_A        30
-#define HMI_VAR_DUTY_CYCLE_B        31
-#define HMI_VAR_DUTY_CYCLE_C        32
-#define HMI_VAR_MOTOR_STATUS        33
-#define HMI_VAR_ANGULAR_SLIP        34
-#define HMI_VAR_KP_QUADRATURE       35
-#define HMI_VAR_KP_DIRECT           36
-#define HMI_VAR_KI_QUADRATURE       37
-#define HMI_VAR_KI_DIRECT           38
-#define HMI_VAR_DRV8302_FAULT_FLAG  39
-#define HMI_VAR_SPEED               40
+#define HMI_VAR_THETA                   0
+#define HMI_VAR_I_Q_REF                 1
+#define HMI_VAR_I_D_REF                 2
+#define HMI_VAR_I_A                     3
+#define HMI_VAR_I_B                     4
+#define HMI_VAR_I_C                     5
+#define HMI_VAR_I_ALPHA                 6
+#define HMI_VAR_I_BETA                  7
+#define HMI_VAR_I_Q                     8
+#define HMI_VAR_I_D                     9
+#define HMI_VAR_I_Q_ERROR               10
+#define HMI_VAR_I_D_ERROR               11
+#define HMI_VAR_I_Q_INTEGRAL_ERROR      12
+#define HMI_VAR_I_D_INTEGRAL_ERROR      13
+#define HMI_VAR_PROPORTIONAL_Q          14
+#define HMI_VAR_PROPORTIONAL_D          15
+#define HMI_VAR_INTEGRAL_Q              16
+#define HMI_VAR_INTEGRAL_D              17
+#define HMI_VAR_V_Q                     18
+#define HMI_VAR_V_D                     19
+#define HMI_VAR_V_ALPHA                 20
+#define HMI_VAR_V_BETA                  21
+#define HMI_VAR_U_ALPHA                 22
+#define HMI_VAR_U_BETA                  23
+#define HMI_VAR_X                       24
+#define HMI_VAR_Y                       25
+#define HMI_VAR_Z                       26
+#define HMI_VAR_TIME_PHASE_A            27
+#define HMI_VAR_TIME_PHASE_B            28
+#define HMI_VAR_TIME_PHASE_C            29
+#define HMI_VAR_DUTY_CYCLE_A            30
+#define HMI_VAR_DUTY_CYCLE_B            31
+#define HMI_VAR_DUTY_CYCLE_C            32
+#define HMI_VAR_MOTOR_STATUS            33
+#define HMI_VAR_ANGULAR_SLIP            34
+#define HMI_VAR_KP_FOC_CURRENT          35
+#define HMI_VAR_KI_FOC_CURRENT          36
+#define HMI_VAR_KP_FOC_SPEED            37
+#define HMI_VAR_KI_FOC_SPEED            38
+#define HMI_VAR_DRV8302_FAULT_FLAG      39
+#define HMI_VAR_SPEED                   40
+#define HMI_VAR_TRIGGER_POSITION        41
 
-#define HMI_SET_VAR_I_Q_REF         1
-#define HMI_SET_VAR_I_D_REF         2
-#define HMI_SET_VAR_ANGULAR_SLIP    3
-#define HMI_SET_VAR_KP_QUADRATURE   4
-#define HMI_SET_VAR_KP_DIRECT       5
-#define HMI_SET_VAR_KI_QUADRATURE   6
-#define HMI_SET_VAR_KI_DIRECT       7
-
-
-
-
+#define HMI_SET_VAR_I_Q_REF             1
+#define HMI_SET_VAR_I_D_REF             2
+#define HMI_SET_VAR_ANGULAR_SLIP        3
+#define HMI_SET_VAR_KP_FOC_CURRENT      4
+#define HMI_SET_VAR_KI_FOC_CURRENT      5
+#define HMI_SET_VAR_KP_FOC_SPEED        6
+#define HMI_SET_VAR_KI_FOC_SPEED        7
+#define HMI_SET_VAR_TRIGGER_POSITION    8
 
 
 namespace miosix {
@@ -277,35 +274,45 @@ namespace miosix {
         static void calculateSpeed();
 
         static char getMotorStatus();
-        
+
         static void setupTimer3(int frequency);
-        
+
         static void dutyCycleTimer3(float dutyCycle);
-        
+
         static void setADCTriggerPosition(char channel, float dutyCycle);
-                
+
         static int getADCvalue();
-        
+
         static void changeTriggerPoint(float value);
 
         static void setupSPI();
-        
+
+        static int getOrbisSensorValues();
+
         static float updateElectricalAngularPosition();
-        
+
         static float getElectricalAngularPosition();
-        
+
         static float getMechanicalAngularPosition();
+
+        static int sinusoidalDrive(float quadratureVoltage, float directVoltage, float theta);
         
-        static int sinusoidalDrive(float theta);
-        
+        static void fieldOrientedControl(float theta);
+
         static float getShuntCurrent(char branch);
-        
+
         static float getFOCvariables(char variable);
-        
+
         static void setFOCvariables(char variable, float value);
-        
+
         static void spaceVectorModulation_setTimes();
         
+        static void setTheta(int orbisSensorAngle);
+        
+        static void testSignal (bool flag);
+        
+        static float getTheta ();
+
 
     private:
         PMACdriver(const PMACdriver&);
@@ -333,9 +340,9 @@ namespace miosix {
          * 
          */
         static void setupADC();
-        
+
         static void setupSimpleADC();
-        
+
 
         /**
          * 
