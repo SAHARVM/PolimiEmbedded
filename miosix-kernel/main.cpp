@@ -59,15 +59,15 @@ char delta_theta = 0;
 
 float err_0 = 0; // expected output - actual output ie. error;
 float err_1 = 0; // error from previous loop
-float intErr_0 = 0; // intErr from previous loop + err; ( i.e. integral error )
-float intErr_1 = 0; // intErr from previous loop
-float dt = 0.001; // execution time of loop
+float intErr = 0; // integral error
+const float dt = 0.001; // execution time of loop
 float q = 0;
 float pTerm = 0;
 float iTerm = 0;
 
 float u = 0;
 float e = 0;
+float i_q = 0;
 
 bool flag = 0;
 
@@ -99,23 +99,28 @@ void thread_SerialControl(void *argv) {
             PMACdriver::changeDutyCycle(dutyCycle);
         } else if (instruction == "gs") {
             cout << PMACdriver::getSpeed(5) * 1000 << endl;
-        }/*else if (instruction == "gos") {
-            cout << PMACdriver::getOrbisSensorBits() << endl;
-        }*/ else if (instruction == "geap") {
+        } else if (instruction == "gdc") {
+            cout << u*1000 << endl;
+        } 
+        
+        else if (instruction == "geap") {
             cout << PMACdriver::getElectricalAngularPosition() << endl;
             //cout << theta_rads << endl;
         } else if (instruction == "gc1") {
             //cout << PMACdriver::getShuntCurrent(1) * 1000 << endl;
             cout << u * 1000 << endl;
-        } else if (instruction == "gc3") {
-            cout << PMACdriver::getShuntCurrent(1) * 1000 << endl;
+        } /*else if (instruction == "gc3") {
+            cout << PMACdriver::calculateShuntCurrent() * 1000 << endl;
             //cout << intErr_0 * 1000 << endl;
-        } else if (instruction == "ss") {
+        } */else if (instruction == "ss") {
             float inSpeed;
             cin >> inSpeed;
-            //if ((inSpeed <= MAX_SPEED_DPS) && (inSpeed >= MIN_SPEED_DPS)) {
             speed = inSpeed;
-            //}
+        }else if (instruction == "sdc") {
+            float inDutyCycle;
+            cin >> inDutyCycle;
+            dutyCycle = inDutyCycle/100;
+            PMACdriver::changeDutyCycle(dutyCycle);
         } else if (instruction == "gk") {
             cout << kp * 1000 << endl;
             cout << ki * 1000 << endl;
@@ -138,9 +143,17 @@ void thread_SerialControl(void *argv) {
         else if (instruction == "HMI_VAR_THETA") cout << PMACdriver::getFOCvariables(HMI_VAR_THETA)*1000 << endl;
         else if (instruction == "HMI_VAR_I_Q_REF") cout << PMACdriver::getFOCvariables(HMI_VAR_I_Q_REF)*1000 << endl;
         else if (instruction == "HMI_VAR_I_D_REF") cout << PMACdriver::getFOCvariables(HMI_VAR_I_D_REF)*1000 << endl;
+        
+        //else if (instruction == "HMI_VAR_I_A") cout << e/*PMACdriver::getFOCvariables(HMI_VAR_I_A)*/*1000 << endl;
+        //else if (instruction == "HMI_VAR_I_B") cout << u/*PMACdriver::getFOCvariables(HMI_VAR_I_B)*/*1000 << endl;
+        //else if (instruction == "HMI_VAR_I_C") cout << i_q/*PMACdriver::getFOCvariables(HMI_VAR_I_C)*/*1000 << endl;
+        
         else if (instruction == "HMI_VAR_I_A") cout << PMACdriver::getFOCvariables(HMI_VAR_I_A)*1000 << endl;
         else if (instruction == "HMI_VAR_I_B") cout << PMACdriver::getFOCvariables(HMI_VAR_I_B)*1000 << endl;
         else if (instruction == "HMI_VAR_I_C") cout << PMACdriver::getFOCvariables(HMI_VAR_I_C)*1000 << endl;
+        
+        
+        
         else if (instruction == "HMI_VAR_I_ALPHA") cout << PMACdriver::getFOCvariables(HMI_VAR_I_ALPHA)*1000 << endl;
         else if (instruction == "HMI_VAR_I_BETA") cout << PMACdriver::getFOCvariables(HMI_VAR_I_BETA)*1000 << endl;
         else if (instruction == "HMI_VAR_I_Q") cout << PMACdriver::getFOCvariables(HMI_VAR_I_Q)*1000 << endl;
@@ -176,7 +189,9 @@ void thread_SerialControl(void *argv) {
         else if (instruction == "HMI_VAR_KI_FOC_SPEED") cout << PMACdriver::getFOCvariables(HMI_VAR_KI_FOC_SPEED)*1000 << endl;
         else if (instruction == "HMI_VAR_DRV8302_FAULT_FLAG") cout << PMACdriver::getFOCvariables(HMI_VAR_DRV8302_FAULT_FLAG)*1000 << endl;
         else if (instruction == "HMI_VAR_SPEED") cout << PMACdriver::getFOCvariables(HMI_VAR_SPEED)*1000 << endl;
-        else if (instruction == "HMI_VAR_TRIGGER_POSITION") cout << PMACdriver::getFOCvariables(HMI_VAR_TRIGGER_POSITION)*1000 << endl;   
+        else if (instruction == "HMI_VAR_TRIGGER_POSITION") cout << PMACdriver::getFOCvariables(HMI_VAR_TRIGGER_POSITION)*1000 << endl;  
+        else if (instruction == "HMI_VAR_VOLTAGE_BUS") cout << PMACdriver::getFOCvariables(HMI_VAR_VOLTAGE_BUS)*1000 << endl;
+        
 
         else if (instruction == "HMI_SET_VAR_I_Q_REF") {
             float x;
@@ -211,6 +226,10 @@ void thread_SerialControl(void *argv) {
             float x;
             cin >> x;
             PMACdriver::setFOCvariables(HMI_SET_VAR_TRIGGER_POSITION, x);
+        } else if (instruction == "HMI_SET_VAR_SPEED") {
+            float x;
+            cin >> x;
+            speed = x/1000;
         }
 
 
@@ -348,20 +367,29 @@ void thread_PMAC_PI(void *argv) {
     long long tick = getTick();
 #ifdef SINUSOIDAL_DRIVE
     while (1) {
-        //Electric_rads = PMACdriver::getTheta();
-        //PMACdriver::fieldOrientedControl(Electric_rads);
+        if (PMACdriver::getMotorStatus()) {
+            e = (speed - PMACdriver::getSpeed(5));
+            u = (e * PMACdriver::getFOCvariables(HMI_VAR_KP_FOC_SPEED)) + intErr;          // Torque
+            i_q = u / MOTOR_TORQUE_CONSTANT;  // Quadrature Current
+            if (i_q > I_MAX) i_q = I_MAX;
+            else if (i_q < -I_MAX) i_q = -I_MAX;
+            else intErr = intErr + ((PMACdriver::getFOCvariables(HMI_VAR_KI_FOC_SPEED) * e) * dt);
+            PMACdriver::setFOCvariables(HMI_SET_VAR_I_Q_REF,i_q*1000);
+            PMACdriver::setFOCvariables(HMI_SET_VAR_I_D_REF,0);
+        }
         tick += period;
         Thread::sleepUntil(tick);
     }
 #else
-
     while (1) {
         if (PMACdriver::getMotorStatus()) {
             e = (speed - PMACdriver::getSpeed(5));
-            u = (e * kp) + intErr_0;
+            //u = (e * kp) + intErr;
+            u = (e * 0.000608) + intErr;
             if (u > 1) u = 1;
             else if (u < 0) u = 0;
-            else intErr_0 = intErr_0 + ((ki * e) * dt);
+            //else intErr = intErr + ((ki * e) * dt);
+            else intErr = intErr + ((0.025 * e) * dt);
             PMACdriver::changeDutyCycle(u);
         }
         tick += period;
@@ -377,12 +405,12 @@ int main() {
     Thread *thread3;
     thread1 = Thread::create(thread_SerialControl, 2048, 2, NULL, Thread::DEFAULT);
     thread2 = Thread::create(thread_1s_tick, 2048, 3, NULL, Thread::DEFAULT);
+#ifdef SPEED_CONTROL
     thread3 = Thread::create(thread_PMAC_PI, 2048, 1, NULL, Thread::DEFAULT);
-
+#endif
     /* TODO */
+    // Create Speed loop enabler/disabler
     // Setup DMA
-    
-    // Change trapezoidal setup to work as the simulation trapezoidal drive
 
     cout << "Permanent Magnet Alternating Current Motor Driver" << endl;
 

@@ -16,9 +16,11 @@
 
 #include "miosix.h"
 
-//#define SINUSOIDAL_DRIVE
+#define SINUSOIDAL_DRIVE
+#define SPEED_CONTROL
 #define MOTOR_HUBMOTOR
-#define ROTOR_DIRECT_VECTOR_ANGULAR_SLIP (0.0)
+//#define DMA
+#define ROTOR_DIRECT_VECTOR_ANGULAR_SLIP 0.61359231f
 
 #ifdef SINUSOIDAL_DRIVE
 #define CONTROL_TIMER_FREQUENCY 10000
@@ -34,8 +36,12 @@
 #define MOTOR_POLE_PAIRS 10
 #define MOTOR_PHASE_RESISTANCE 0.160
 #define MOTOR_PHASE_INDUCTANCE .076
-#define MOTOR_ELECTRICAL_CONSTANT 0.03775
+#define MOTOR_ELECTRICAL_CONSTANT 0.36f // rads/s
+#define MOTOR_TORQUE_CONSTANT 0.4506f // kT
+#define SPEED_CALCULATION_TIMEOUT 0.1f // seconds
 #define DC_BUS 24   // Must be measured later
+#define I_MAX 5
+#define I_OFFSET_B 0.0f//0.75f
 #else
 #define MOTOR_POLE_PAIRS 8
 #define MOTOR_PHASE_RESISTANCE 0.1
@@ -107,6 +113,7 @@
 #define HMI_VAR_DRV8302_FAULT_FLAG      39
 #define HMI_VAR_SPEED                   40
 #define HMI_VAR_TRIGGER_POSITION        41
+#define HMI_VAR_VOLTAGE_BUS             42
 
 #define HMI_SET_VAR_I_Q_REF             1
 #define HMI_SET_VAR_I_D_REF             2
@@ -116,6 +123,19 @@
 #define HMI_SET_VAR_KP_FOC_SPEED        6
 #define HMI_SET_VAR_KI_FOC_SPEED        7
 #define HMI_SET_VAR_TRIGGER_POSITION    8
+#define HMI_SET_VAR_SPEED               9
+
+struct shuntCurrent_bits {
+    int current_branch_A_bits;
+    int current_branch_B_bits;
+    int current_branch_C_bits;
+};
+
+struct shuntCurrent_amps {
+    float current_branch_A_amps;
+    float current_branch_B_amps;
+    float current_branch_C_amps;
+};
 
 
 namespace miosix {
@@ -299,7 +319,7 @@ namespace miosix {
         
         static void fieldOrientedControl(float theta);
 
-        static float getShuntCurrent(char branch);
+        static void calculateShuntCurrent();
 
         static float getFOCvariables(char variable);
 
@@ -312,6 +332,8 @@ namespace miosix {
         static void testSignal (bool flag);
         
         static float getTheta ();
+        
+        static void voltageBusCalculation ();
 
 
     private:
