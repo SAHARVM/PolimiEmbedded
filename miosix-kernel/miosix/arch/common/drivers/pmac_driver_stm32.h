@@ -17,6 +17,7 @@
 #include "miosix.h"
 
 #define SINUSOIDAL_DRIVE
+//#define TRAPEZOIDAL_BRAKE
 #define SPEED_CONTROL
 #define MOTOR_HUBMOTOR
 //#define DMA
@@ -38,9 +39,9 @@
 #define MOTOR_PHASE_INDUCTANCE .076
 #define MOTOR_ELECTRICAL_CONSTANT 0.36f // rads/s
 #define MOTOR_TORQUE_CONSTANT 0.4506f // kT
-#define SPEED_CALCULATION_TIMEOUT 0.1f // seconds
+#define SPEED_CALCULATION_TIMEOUT 0.5f // seconds
 #define DC_BUS 24   // Must be measured later
-#define I_MAX 5
+#define I_MAX 10
 #define I_OFFSET_B 0.0f//0.75f
 #else
 #define MOTOR_POLE_PAIRS 8
@@ -277,13 +278,17 @@ namespace miosix {
          * @param dutyCycle
          * @return 
          */
-        static int trapezoidalDrive();
+        static void trapezoidalDrive();
 
         static void allGatesLow();
 
         static void highSideGatesLow();
 
         static void lowSideGatesLow();
+        
+        static void disablePWM(char channel);
+        
+        static void enablePWM(char channel);
 
         static void changeDutyCycle(float dutyCycle);
 
@@ -334,6 +339,8 @@ namespace miosix {
         static float getTheta ();
         
         static void voltageBusCalculation ();
+        
+        static void currentReadingCalibration ();
 
 
     private:

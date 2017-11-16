@@ -25,17 +25,24 @@ typedef Gpio<GPIOB_BASE, 13> pwmSignalL3; // TIM1_CH1N
 typedef Gpio<GPIOB_BASE, 14> pwmSignalL2; // TIM1_CH2N
 typedef Gpio<GPIOB_BASE, 15> pwmSignalL1; // TIM1_CH3N
 #else
+#ifdef TRAPEZOIDAL_BRAKE
+typedef Gpio<GPIOB_BASE, 13> pwmSignalL3; // TIM1_CH1N
+typedef Gpio<GPIOB_BASE, 14> pwmSignalL2; // TIM1_CH2N
+typedef Gpio<GPIOB_BASE, 15> pwmSignalL1; // TIM1_CH3N
+#else
 typedef Gpio<GPIOB_BASE, 13> outSignalL3;
 typedef Gpio<GPIOB_BASE, 14> outSignalL2;
 typedef Gpio<GPIOB_BASE, 15> outSignalL1;
+#endif
 #endif // SINUSOIDAL_DRIVE
-
 
 typedef Gpio<GPIOB_BASE, 6> hallSensor1;
 typedef Gpio<GPIOB_BASE, 7> hallSensor2;
 typedef Gpio<GPIOC_BASE, 11> hallSensor3;
+
 typedef Gpio<GPIOC_BASE, 10> enableGate;
-typedef Gpio<GPIOC_BASE, 12> faultPin; // TODO: implement monitor and handler for this signal
+typedef Gpio<GPIOC_BASE, 12> faultPin;
+typedef Gpio<GPIOB_BASE, 12> dc_cal;
 
 typedef Gpio<GPIOA_BASE, 0> phaseVoltage3_ADC; // ADC channel 0
 typedef Gpio<GPIOA_BASE, 1> phaseVoltage2_ADC; // ADC channel 1
@@ -183,6 +190,9 @@ float busVoltage_volts = 24;
 shuntCurrent_bits current_measured_bits;
 shuntCurrent_amps current_measured_amps;
 
+float currentA_offset_amps = 0;
+float currentC_offset_amps = 0;
+
 /**
  * Timer 2 interrupt handler 
  */
@@ -191,14 +201,10 @@ void TIM2_IRQHandler() {
     TIM2->SR = 0; // Clear interrupt flags
 #ifdef SINUSOIDAL_DRIVE
     PMACdriver::calculateSpeed();
+    PMACdriver::calculateShuntCurrent();
     PMACdriver::voltageBusCalculation();
     theta_rads = PMACdriver::getTheta();
-    if (theta_rads >= 0){
-        PMACdriver::fieldOrientedControl(theta_rads);
-        PMACdriver::testSignal(1);
-    }
-    else 
-        PMACdriver::testSignal(0);
+    PMACdriver::fieldOrientedControl(theta_rads);
 #else 
     PMACdriver::trapezoidalDrive();
 #endif // SINUSOIDAL_DRIVE
@@ -210,121 +216,42 @@ void TIM2_IRQHandler() {
 void __attribute__ ((used)) adcimpl() {
 
 #ifdef SINUSOIDAL_DRIVE
-    
-#if 0
-    if (ADC1->SR & ADC_SR_OVR)
-        ADC1->SR &= ~ADC_SR_OVR;
-    
-    else if (ADC1->SR & ADC_SR_JEOC) {
-        ADC1->SR &= ~ADC_SR_JEOC;
-        injectedADC_CurrentBranch1 = ADC1->JDR1; // store ADC value
-        injectedADC_CurrentBranch3 = ADC1->JDR2; // store ADC value
-        current_measured_bits.current_branch_A_bits = injectedADC_CurrentBranch1;
-        current_measured_bits.current_branch_C_bits = injectedADC_CurrentBranch3;
-    }
-#else
-    
     if (ADC1->SR & ADC_SR_JEOC) {
         ADC1->SR &= ~ADC_SR_JEOC;
-        injectedADC_CurrentBranch1 = ADC1->JDR1; // store ADC value
-        current_measured_bits.current_branch_A_bits = injectedADC_CurrentBranch1;
+        current_measured_bits.current_branch_A_bits = ADC1->JDR1;
     }
     if (ADC2->SR & ADC_SR_JEOC){
         ADC2->SR &= ~ADC_SR_JEOC;
-        injectedADC_CurrentBranch3 = ADC2->JDR1; // store ADC value
-        current_measured_bits.current_branch_C_bits = injectedADC_CurrentBranch3;
+        current_measured_bits.current_branch_C_bits = ADC2->JDR1;
+    }
+    if (ADC3->SR & ADC_SR_JEOC){
+        ADC3->SR &= ~ADC_SR_JEOC;
+        busVoltage_bits = ADC3->JDR1; // store ADC value
+    }    
+//    if (LED_flag){
+//        PMACdriver::testSignal(1);
+//        LED_flag = 0;
+//    } else {
+//        PMACdriver::testSignal(0);
+//        LED_flag = 1;
+//    }
+#else       
+    if (ADC1->SR & ADC_SR_JEOC) {
+        ADC1->SR &= ~ADC_SR_JEOC;
+        if (currentReadingFlag_1 == 1) { // if current is passing through branch 1
+            current_measured_bits.current_branch_A_bits = ADC1->JDR1; // store ADC value
+        }
+    }
+    if (ADC2->SR & ADC_SR_JEOC){
+        ADC2->SR &= ~ADC_SR_JEOC;
+        if (currentReadingFlag_3 == 1) { // if current is passing through branch 1
+            current_measured_bits.current_branch_C_bits = ADC2->JDR1;
+        }
     }
     if (ADC3->SR & ADC_SR_JEOC){
         ADC3->SR &= ~ADC_SR_JEOC;
         busVoltage_bits = ADC3->JDR1; // store ADC value
     }
-    
-#endif
-    
-    
-    
-#else
-    int dummy;
-    if (ADC1->SR & ADC_SR_OVR) ADC1->SR &= ~ADC_SR_OVR;
-    
-        
-    if (ADC1->SR & ADC_SR_JEOC) {
-        ADC1->SR &= ~ADC_SR_JEOC;
-        if (currentReadingFlag_1 == 1) { // if current is passing through branch 1
-            injectedADC_CurrentBranch1 = ADC1->JDR1; // store ADC value
-        } 
-//        else {
-//            dummy = ADC1->JDR1; // to clear DR
-//        }
-        if (currentReadingFlag_3 == 1) { // if current is passing through branch 3
-            injectedADC_CurrentBranch3 = ADC1->JDR2; // store ADC value
-        } 
-//        else {
-//            dummy = ADC1->JDR2; // to clear DR
-//        }
-
-        if (LED_flag) {
-            pwmSignal0::high();
-            LED_flag = 0;
-        } else {
-            pwmSignal0::low();
-            LED_flag = 1;
-        }
-    }
-    
-#if 0
-    if (ADC1->SR & ADC_SR_EOC) { // If it's a regular conversion, the current obtained is from 0 to D
-        if (regularChannelReadFlag == 0) { // current read was from channel 8, current 1
-            if (currentReadingFlag_1 == 1) { // if current is passing through branch 1 (not needed for FOC)
-                currentRead_D_branch1 = ADC1->DR; // store ADC value
-                current_D_obtained_branch1 = 1; // flag that reading 1/2 of channel 8 is obtained
-            } else {
-                dummy = ADC1->DR; // to clear DR
-            }
-        } else if (regularChannelReadFlag == 1) { // current read was from channel 9, current 3
-            if (currentReadingFlag_3 == 1) { // if current is passing through branch 1 (not needed for FOC)
-                currentRead_D_branch3 = ADC1->DR; // store ADC value
-                current_D_obtained_branch3 = 1; // flag that reading 2/2 of channel 8 is obtained
-            } else {
-                dummy = ADC1->DR; // to clear DR
-            }
-        }
-
-        if (regularChannelReadFlag == 0)
-            regularChannelReadFlag = 1;
-        //else 
-        //   regularChannelReadFlag = 0;
-
-    } 
-    else if (ADC1->SR & ADC_SR_JEOC) { // If it's an injected conversion, the current obtained is from D to 1 
-        regularChannelReadFlag = 0;
-        ADC1->SR &= ~ADC_SR_JEOC; // clear interrupt flag (needed!!)
-        if (currentReadingFlag_1 == 1) { // if current is passing through branch 1 (not needed for FOC)
-            currentRead_1_D_branch1 = ADC1->JDR1; // store ADC value
-            current_1_D_obtained_branch1 = 1; // flag that reading 1/2 of channel 8 is obtained
-        } else {
-            dummy = ADC1->JDR1; // to clear DR
-        }
-        if (currentReadingFlag_3 == 1) { // if current is passing through branch 1 (not needed for FOC)
-            currentRead_1_D_branch3 = ADC1->JDR2; // store ADC value
-            current_1_D_obtained_branch3 = 1; // flag that reading 2/2 of channel 8 is obtained
-        } else {
-            dummy = ADC1->JDR2; // to clear DR
-        }
-    }
-
-    if (current_D_obtained_branch1 && current_1_D_obtained_branch1) {
-        currentRead_avg_branch1 = (currentRead_D_branch1 + currentRead_1_D_branch1) / 2;
-        current_D_obtained_branch1 = 0;
-        current_1_D_obtained_branch1 = 0;
-    }
-
-    if (current_D_obtained_branch3 && current_1_D_obtained_branch3) {
-        currentRead_avg_branch3 = (currentRead_D_branch3 + currentRead_1_D_branch3) / 2;
-        current_D_obtained_branch3 = 0;
-        current_1_D_obtained_branch3 = 0;
-    }
-#endif // if 0
 #endif // SINUSOIDAL_DRIVE
     if (waiting == 0) return;
     waiting->IRQwakeup();
@@ -378,24 +305,32 @@ namespace miosix {
         TIM1->CCR3 = 0;
         TIM1->CCR4 = 0; // TIM1 CC4 doesn't generate a PWM output signal in a pin, it's used for the ADC
 #ifdef SINUSOIDAL_DRIVE
-        TIM1->CR1 |= TIM_CR1_CMS_1; // Center-aligned mode 2 (flags set when counting up)
+        //TIM1->CR1 |= TIM_CR1_CMS_1; // Center-aligned mode 2 (flags set when counting up)
 #endif  // SINUSOIDAL_DRIVE
         //TIM1->CR2 |= TIM_CR2_MMS_0;                     // Master mode: enable
-        TIM1->CR2 |= TIM_CR2_MMS_1; // Master mode: update
+        //TIM1->CR2 |= TIM_CR2_MMS_1; // Master mode: update
         //TIM1->CR2 |= TIM_CR2_MMS_2;                     // Master mode: OC1REF used as trigger
-        TIM1->SMCR |= TIM_SMCR_MSM; // Master/slave mode
+        //TIM1->SMCR |= TIM_SMCR_MSM; // Master/slave mode
 
+        TIM1->CR2 |= TIM_CR2_OIS1
+                | TIM_CR2_OIS1N
+                | TIM_CR2_OIS2
+                | TIM_CR2_OIS2N
+                | TIM_CR2_OIS3
+                | TIM_CR2_OIS3N;
+        
         /* Initialize motor driver specifics */
         setupHallSensors();
         enableGate::mode(Mode::OUTPUT); // TODO: Find a better place for this
         faultPin::mode(Mode::INPUT); // Doesn't have a handler yet - TODO: IMPLEMENT HANDLER
+        dc_cal::mode(Mode::OUTPUT);
         disableDriver(); // Must be enabled later to drive the power MOS gates
         setupControlTimer(CONTROL_TIMER_FREQUENCY); // TIM2 - Runs the control algorithm
 #ifdef SINUSOIDAL_DRIVE
-        setupADCTimer(); // TIM8 CC1 and CC2, also TIM1 CC4 must be setup 
-        setupADC();
-#endif
+        //setupADCTimer(); // TIM8 CC1 and CC2, also TIM1 CC4 must be setup
         setupSPI();
+#endif 
+        setupADC();
         pwmSignal0::mode(Mode::OUTPUT);
     }
 
@@ -449,7 +384,21 @@ namespace miosix {
             pwmSignalH1::alternateFunction(1);
             pwmSignalH1::mode(Mode::ALTERNATE);
 
+            TIM1->CCMR2 |= TIM_CCMR2_OC4M_2
+                    | TIM_CCMR2_OC4M_1
+                    | TIM_CCMR2_OC4PE;
+            TIM1->CCER |= TIM_CCER_CC4E;
+            // CC4 doesn't need an output pin
+            
 #ifdef SINUSOIDAL_DRIVE
+            pwmSignalL1::alternateFunction(1);
+            pwmSignalL1::mode(Mode::ALTERNATE);
+            pwmSignalL2::alternateFunction(1);
+            pwmSignalL2::mode(Mode::ALTERNATE);
+            pwmSignalL3::alternateFunction(1);
+            pwmSignalL3::mode(Mode::ALTERNATE);
+#else
+#ifdef TRAPEZOIDAL_BRAKE
             pwmSignalL1::alternateFunction(1);
             pwmSignalL1::mode(Mode::ALTERNATE);
             pwmSignalL2::alternateFunction(1);
@@ -463,13 +412,9 @@ namespace miosix {
             outSignalL2::low();
             outSignalL1::mode(Mode::OUTPUT);
             outSignalL1::low();
+#endif
 #endif  // SINUSOIDAL_DRIVE
 
-            TIM1->CCMR2 |= TIM_CCMR2_OC4M_2
-                    | TIM_CCMR2_OC4M_1
-                    | TIM_CCMR2_OC4PE;
-            TIM1->CCER |= TIM_CCER_CC4E;
-            // CC4 doesn't need an output pin
         }
     }
 
@@ -484,9 +429,11 @@ namespace miosix {
             pwmSignalH3::mode(Mode::INPUT);
             TIM1->CCER &= ~TIM_CCER_CC3E;
 #ifndef SINUSOIDAL_DRIVE
+#ifndef TRAPEZOIDAL_BRAKE
             outSignalL3::mode(Mode::INPUT);
             outSignalL2::mode(Mode::INPUT);
             outSignalL1::mode(Mode::INPUT);
+#endif
 #endif  // SINUSOIDAL_DRIVE
         }
     }
@@ -498,15 +445,30 @@ namespace miosix {
         TIM1->BDTR |= 0
                 //| TIM_BDTR_DTG_0
                 //| TIM_BDTR_DTG_1
-                //| TIM_BDTR_DTG_2
+                //| TIM_BDTR_DTG_2;
                 //| TIM_BDTR_DTG_3
                 //| TIM_BDTR_DTG_4;
-                | TIM_BDTR_DTG_5;
+                | TIM_BDTR_DTG_5;       // dead time = 0.1904 us
                 //| TIM_BDTR_DTG_6;
                 //| TIM_BDTR_DTG_7; // dead time
 #endif
+#ifdef TRAPEZOIDAL_BRAKE
+        TIM1->BDTR |= 0
+                //| TIM_BDTR_DTG_0
+                //| TIM_BDTR_DTG_1
+                //| TIM_BDTR_DTG_2
+                //| TIM_BDTR_DTG_3
+                | TIM_BDTR_DTG_4;       // dead time = 0.0952 us
+                //| TIM_BDTR_DTG_5;
+                //| TIM_BDTR_DTG_6;
+                //| TIM_BDTR_DTG_7; // dead time
+#endif
+        
+#ifdef SINUSOIDAL_DRIVE
+        TIM1->CR1 |= TIM_CR1_CMS_1; // Counter Register 1 = Counter Enable
+#endif // SINUSOIDAL_DRIVE
         TIM1->BDTR |= TIM_BDTR_MOE; // Advanced timers need to have the main output enabled after CCxE is set
-        TIM1->CR1 = TIM_CR1_CEN; // Counter Register 1 = Counter Enable
+        TIM1->CR1 |= TIM_CR1_CEN;
     }
 
     void PMACdriver::stop() {
@@ -519,7 +481,7 @@ namespace miosix {
             if (waiting) waiting->IRQwakeup();
             IRQwaitForTimerOverflow(dLock);
         }
-        TIM1->CR1 = 0;
+        TIM1->CR1 &= ~TIM_CR1_CEN;
     }
 
     void PMACdriver::setHighSideWidth(char channel, float pulseWidth) {
@@ -540,6 +502,7 @@ namespace miosix {
 
     void PMACdriver::setLowSide(char channel, bool value) {
 #ifndef SINUSOIDAL_DRIVE
+#ifndef TRAPEZOIDAL_BRAKE
         switch (channel) {
             case 1:
                 value == 1 ? outSignalL1::high() : outSignalL1::low();
@@ -553,8 +516,63 @@ namespace miosix {
             default:
                 break;
         }
+#else
 #endif
-
+#endif
+    }
+    
+    void PMACdriver::disablePWM(char channel){
+        switch (channel){
+            case 0:
+                TIM1->CCER &= ~TIM_CCER_CC1E;
+                TIM1->CCER &= ~TIM_CCER_CC2E;
+                TIM1->CCER &= ~TIM_CCER_CC3E;
+                TIM1->CCER &= ~TIM_CCER_CC1NE;
+                TIM1->CCER &= ~TIM_CCER_CC2NE;
+                TIM1->CCER &= ~TIM_CCER_CC3NE;
+                break;
+            case 1:
+                TIM1->CCER &= ~TIM_CCER_CC3E;
+                TIM1->CCER &= ~TIM_CCER_CC3NE;
+                break;
+            case 2:
+                TIM1->CCER &= ~TIM_CCER_CC2E;
+                TIM1->CCER &= ~TIM_CCER_CC2NE;
+                break;
+            case 3:
+                TIM1->CCER &= ~TIM_CCER_CC1E;
+                TIM1->CCER &= ~TIM_CCER_CC1NE;
+                break;
+            default:
+                break;
+        }
+    }
+    
+    void PMACdriver::enablePWM(char channel){
+        switch (channel){
+            case 0:
+                TIM1->CCER |= TIM_CCER_CC1E
+                    | TIM_CCER_CC1NE
+                    | TIM_CCER_CC2E
+                    | TIM_CCER_CC2NE
+                    | TIM_CCER_CC3E
+                    | TIM_CCER_CC3NE;
+                break;
+            case 1:
+                TIM1->CCER |= TIM_CCER_CC3E
+                    | TIM_CCER_CC3NE;
+                break;
+            case 2:
+                TIM1->CCER |= TIM_CCER_CC2E
+                    | TIM_CCER_CC2NE;
+                break;
+            case 3:
+                TIM1->CCER |= TIM_CCER_CC1E
+                    | TIM_CCER_CC1NE;
+                break;
+            default:
+                break;
+        }
     }
 
     void PMACdriver::setupHallSensors() {
@@ -584,7 +602,6 @@ namespace miosix {
     }
 
     void PMACdriver::updateFaultFlag() {
-        /* TODO: Set up a HMI handler for this flag!! */
         faultFlag = faultPin::value();
     }
 
@@ -593,9 +610,157 @@ namespace miosix {
         return faultFlag;
     }
 
-    int PMACdriver::trapezoidalDrive() {
-#ifndef SINUSOIDAL_DRIVE
-        updateHallEffectSensorsValue();
+    void PMACdriver::trapezoidalDrive() {
+#ifdef TRAPEZOIDAL_BRAKE
+        calculateSpeed();
+        if ((hallEffectSensors_oldPosition != hallEffectSensors_newPosition)||(getSpeed(5) < 20)) {
+            //allGatesLow();
+            currentReadingFlag_1 = 0;
+            currentReadingFlag_3 = 0;
+            if (vDirection == CW) {
+                if (hallEffectSensors_newPosition == 0b001) {
+                    
+                    disablePWM(3);
+                    
+                    setHighSideWidth (1,0);
+                    setHighSideWidth(2, vDutyCycle);
+                    
+                    enablePWM(1);
+                    enablePWM(2);
+                    
+                    currentReadingFlag_1 = 1;
+                    
+                } else if (hallEffectSensors_newPosition == 0b101) {
+                    
+                    disablePWM(2);
+                    
+                    setHighSideWidth (1,0);
+                    setHighSideWidth(3, vDutyCycle);
+                    
+                    enablePWM(1);
+                    enablePWM(3);
+                    
+                    currentReadingFlag_1 = 1;
+                    
+                } else if (hallEffectSensors_newPosition == 0b100) {
+                    
+                    disablePWM(1);
+                    
+                    setHighSideWidth (2,0);
+                    setHighSideWidth(3, vDutyCycle);
+                    
+                    enablePWM(2);
+                    enablePWM(3);
+                    
+                } else if (hallEffectSensors_newPosition == 0b110) {
+                    
+                    disablePWM(3);
+                    
+                    setHighSideWidth (2,0);
+                    setHighSideWidth(1, vDutyCycle);
+                    
+                    enablePWM(1);
+                    enablePWM(2);
+                    
+                } else if (hallEffectSensors_newPosition == 0b010) {
+                    
+                    disablePWM(2);
+                    
+                    setHighSideWidth (3,0);
+                    setHighSideWidth(1, vDutyCycle);
+                    
+                    enablePWM(1);
+                    enablePWM(3);
+                    
+                    currentReadingFlag_3 = 1;
+                    
+                } else if (hallEffectSensors_newPosition == 0b011) {
+                    
+                    disablePWM(1);
+                    
+                    setHighSideWidth (3,0);             //setLowSide(3, 1);
+                    setHighSideWidth(2, vDutyCycle);
+                    
+                    enablePWM(2);
+                    enablePWM(3);
+                    
+                    currentReadingFlag_3 = 1;
+                }
+            } else if (vDirection == CCW) {
+                if (hallEffectSensors_newPosition == 0b001) {
+                    
+                    disablePWM(3);
+                    
+                    setHighSideWidth (2,0);             //setLowSide(2, 1);
+                    setHighSideWidth(1, vDutyCycle);
+                    
+                    enablePWM(1);
+                    enablePWM(2);
+                    
+                } else if (hallEffectSensors_newPosition == 0b101) {
+                    
+                    disablePWM(2);
+                    
+                    setHighSideWidth (3,0);             //setLowSide(3, 1);
+                    setHighSideWidth(1, vDutyCycle);
+                    
+                    enablePWM(1);
+                    enablePWM(3);
+                    
+                    currentReadingFlag_3 = 1;
+                    
+                } else if (hallEffectSensors_newPosition == 0b100) {
+                    
+                    disablePWM(1);
+                    
+                    setHighSideWidth (3,0);             //setLowSide(3, 1);
+                    setHighSideWidth(2, vDutyCycle);
+                    
+                    enablePWM(2);
+                    enablePWM(3);
+                    
+                    currentReadingFlag_3 = 1;
+                    
+                } else if (hallEffectSensors_newPosition == 0b110) {
+                    
+                    disablePWM(3);
+                    
+                    setHighSideWidth (1,0);             //setLowSide(1, 1);
+                    setHighSideWidth(2, vDutyCycle);
+                    
+                    enablePWM(1);
+                    enablePWM(2);
+                    
+                    currentReadingFlag_1 = 1;
+                    
+                } else if (hallEffectSensors_newPosition == 0b010) {
+                    
+                    disablePWM(2);
+                    
+                    setHighSideWidth (1,0);             //setLowSide(1, 1);
+                    setHighSideWidth(3, vDutyCycle);
+                    
+                    enablePWM(1);
+                    enablePWM(3);
+                    
+                    currentReadingFlag_1 = 1;
+                    
+                } else if (hallEffectSensors_newPosition == 0b011) {
+                    
+                    disablePWM(1);
+                    
+                    setHighSideWidth (2,0);             //setLowSide(2, 1);
+                    setHighSideWidth(3, vDutyCycle);
+                    
+                    enablePWM(2);
+                    enablePWM(3);
+                    
+                }
+            }
+            setADCTriggerPosition(1,vDutyCycle);
+        }
+#else
+        //updateHallEffectSensorsValue();
         calculateSpeed();
         if ((hallEffectSensors_oldPosition != hallEffectSensors_newPosition)||(getSpeed(5) < 20)) {
             allGatesLow();
@@ -651,12 +816,7 @@ namespace miosix {
                 }
             }
             setADCTriggerPosition(1,vDutyCycle);
-            return 1;
-        } else {
-            return 0;
         }
-#else
-        return 0;
 #endif
     }
 
@@ -697,17 +857,6 @@ namespace miosix {
     }
 
     void PMACdriver::setupADCTimer() {
-        /*
-         * ADC is synchronized with the timers as follows:
-         *  TIM8 CC1 falling edge starts the conversion for the regular channels:
-         *      - ADC1: phase voltage 3 | current 2 | motor temperature
-         *      - ADC2: phase voltage 2 | current 1
-         *      - ADC3: phase voltage 1 | board temperature | bus voltage
-         *  TIM8 CC2 falling edge starts the conversion for the injected channels:
-         *      - ADC2: current 2 and then current 1
-         *  TIM1 CC4 falling edge starts the conversion for the injected channels:
-         *      - ADC1: current 1 and then current 2
-         */
 #ifdef SINUSOIDAL_DRIVE
         TIM8->CR1 = 0; // Erase register to set it up
 
@@ -772,14 +921,11 @@ namespace miosix {
 
     void PMACdriver::setADCTriggerPosition(char channel, float dutyCycle) {
 #ifdef SINUSOIDAL_DRIVE
-        TIM1->CCR4 = 0.99 * PWM_RESOLUTION;
-        //TIM1->CCR4 = PWM_RESOLUTION;
-        //TIM8->CCR2 = dutyCycle * ADC_triggerPoint * PWM_RESOLUTION;
+        TIM1->CCR4 = 0.95 * PWM_RESOLUTION;
 
 #else
         float firstTrigger = dutyCycle / 2;
         float secondTrigger = dutyCycle + ((1 - dutyCycle) / 2);
-        //TIM8->CCR1 = firstTrigger * PWM_RESOLUTION;
         if (dutyCycle > 0.5) TIM1->CCR4 = firstTrigger * PWM_RESOLUTION;
         else if (dutyCycle <= 0.5) TIM1->CCR4 = secondTrigger * PWM_RESOLUTION;
         
@@ -801,8 +947,8 @@ namespace miosix {
         /* Setup timer trigger */
         //ADC1->CR2 |= ADC_CR2_EXTEN_1; // External trigger enable for regular channels in falling edge
         //ADC1->CR2 |= ADC_CR2_EXTSEL_0 | ADC_CR2_EXTSEL_2 | ADC_CR2_EXTSEL_3; // TIM8 CC1 event for regular group
-        //ADC1->CR2 |= ADC_CR2_JEXTEN_1; // External trigger enable for injected channels in falling edge
-        ADC1->CR2 |= ADC_CR2_JEXTEN_0 | ADC_CR2_JEXTEN_1; // External trigger enable for injected channels in rising/falling edge
+        ADC1->CR2 |= ADC_CR2_JEXTEN_1; // External trigger enable for injected channels in falling edge
+        //ADC1->CR2 |= ADC_CR2_JEXTEN_0 | ADC_CR2_JEXTEN_1; // External trigger enable for injected channels in rising/falling edge
         ADC1->CR2 |= 0; // TIM1 CC4 event for injected group
         //ADC1->CR2 |= ADC_CR2_JEXTSEL_2 | ADC_CR2_JEXTSEL_3; // TIM8 CC2 event for injected group
 
@@ -855,7 +1001,8 @@ namespace miosix {
         ADC->CCR |= ADC_CCR_MULTI_0 | ADC_CCR_MULTI_2 | ADC_CCR_MULTI_4;
         
         /* Setup timer trigger - All ADCs follow ADC1 */
-        ADC1->CR2 |= ADC_CR2_JEXTEN_0 | ADC_CR2_JEXTEN_1; // External trigger enable for injected channels in rising/falling edge
+        //ADC1->CR2 |= ADC_CR2_JEXTEN_0 | ADC_CR2_JEXTEN_1; // External trigger enable for injected channels in rising/falling edge
+        ADC1->CR2 |= ADC_CR2_JEXTEN_1; // External trigger enable for injected channels in falling edge
         ADC1->CR2 |= 0; // TIM1 CC4 event for injected group
         
         /*Channel setup*/
@@ -888,45 +1035,53 @@ namespace miosix {
 #endif
 #else   // SINUSOIDAL_DRIVE
         /* Setup timer trigger */
-        //ADC1->CR2 |= ADC_CR2_EXTEN_1; // External trigger enable for regular channels in falling edge
-        //ADC1->CR2 |= ADC_CR2_EXTSEL_0 | ADC_CR2_EXTSEL_2 | ADC_CR2_EXTSEL_3; // TIM8 CC1 event for regular group
+        /* Triple ADC mode */
+        ADC->CCR |= ADC_CCR_MULTI_0 | ADC_CCR_MULTI_2 | ADC_CCR_MULTI_4;
+        
+        /* Setup timer trigger - All ADCs follow ADC1 */
         ADC1->CR2 |= ADC_CR2_JEXTEN_1; // External trigger enable for injected channels in falling edge
         ADC1->CR2 |= 0; // TIM1 CC4 event for injected group
-
+        
         /*Channel setup*/
         ADC1->SMPR2 |= ADC_SMPR2_SMP8_0; // 15 cycles for channel 8 - currentSense2_ADC (ADC1)
-        ADC1->SMPR2 |= ADC_SMPR2_SMP9_0; // 15 cycles for channel 9 - currentSense1_ADC (ADC1)
-        //ADC1->SQR1 |= ADC_SQR1_L_0; // Regular channel sequence length = 1+1 = 2
-        //ADC1->SQR3 |= ADC_SQR3_SQ1_3; // First conversion is ADC 1 channel 8
-        //ADC1->SQR3 |= ADC_SQR3_SQ2_0 | ADC_SQR3_SQ2_3; // Second conversion is ADC 1 channel 9
-
+        ADC2->SMPR2 |= ADC_SMPR2_SMP9_0; // 15 cycles for channel 9 - currentSense1_ADC (ADC2)
+        ADC3->SMPR1 |= ADC_SMPR1_SMP12_0; // 15 cycles for channel 12 - voltageBus_ADC (ADC3)
+        
         /* Injected channels setup */
-        ADC1->JSQR |= ADC_JSQR_JL_0; // Injected channel sequence length = 1+1
-        ADC1->JSQR |= ADC_JSQR_JSQ3_3; // ADC1 1st injected conversion is channel 8: 01000 - Current sensor 2
-        ADC1->JSQR |= ADC_JSQR_JSQ4_0 | ADC_JSQR_JSQ4_3; // ADC1 2nd injected conversion is channel 9: 01001 - Current sensor 1
-
+        ADC1->JSQR |= ADC_JSQR_JSQ4_3;                      // ADC1 1st injected conversion is channel 8: 01000 - Current sensor 2
+        ADC2->JSQR |= ADC_JSQR_JSQ4_0 | ADC_JSQR_JSQ4_3;    // ADC2 1st injected conversion is channel 9: 01001 - Current sensor 1
+        ADC3->JSQR |= ADC_JSQR_JSQ4_2 | ADC_JSQR_JSQ4_3;    // ADC2 1st injected conversion is channel 12: 01100 - Voltage Bus
+        
         /*Interrupts setup*/
-        //ADC1->CR1 |= ADC_CR1_DISCEN; // Discontinuous mode regular channels enabled
         ADC1->CR1 |= ADC_CR1_JDISCEN; // Discontinuous mode injected channels enabled
-        ADC1->CR1 |= ADC_CR1_SCAN;
+        ADC2->CR1 |= ADC_CR1_JDISCEN; // Discontinuous mode injected channels enabled
+        ADC3->CR1 |= ADC_CR1_JDISCEN; // Discontinuous mode injected channels enabled
         ADC1->CR1 |= ADC_CR1_JEOCIE; // JEOC interrupt enabled
-        //ADC1->CR1 |= ADC_CR1_EOCIE; // EOC interrupt enabled
-        ADC1->CR1 |= ADC_CR1_OVRIE; // Overrun interrupt enabled
+        ADC2->CR1 |= ADC_CR1_JEOCIE; // JEOC interrupt enabled
+        ADC3->CR1 |= ADC_CR1_JEOCIE; // JEOC interrupt enabled
+        //ADC1->CR1 |= ADC_CR1_OVRIE; // Overrun interrupt enabled
         ADC1->CR2 |= ADC_CR2_EOCS;
+        ADC2->CR2 |= ADC_CR2_EOCS;
+        ADC3->CR2 |= ADC_CR2_EOCS;
         NVIC_SetPriority(ADC_IRQn, ADC_IRQN_PRIORITY); //Low priority for ADC IRQ
         NVIC_EnableIRQ(ADC_IRQn);
+        
         ADC1->CR2 |= ADC_CR2_ADON; // A/D converter ON
+        ADC2->CR2 |= ADC_CR2_ADON; // A/D converter ON
+        ADC3->CR2 |= ADC_CR2_ADON; // A/D converter ON
 #endif  // SINUSOIDAL_DRIVE
     }
 
     void PMACdriver::calculateShuntCurrent() {
         if (getMotorStatus()) {
             current_measured_amps.current_branch_A_amps = 
-                    ((((float)current_measured_bits.current_branch_A_bits) * 3.3 / 4096 ) - (3.3 / 2))/(10 * 0.001);
+                    ((((float)current_measured_bits.current_branch_A_bits) * 3.3 / 4096 ) - (3.3 / 2))/(10 * 0.001) - currentA_offset_amps;
+                    //(((float)current_measured_bits.current_branch_A_bits * 0.08056640625) - 165) + currentA_offset_amps;
             current_measured_amps.current_branch_C_amps = 
-                    ((((float)current_measured_bits.current_branch_C_bits) * 3.3 / 4096 ) - (3.3 / 2))/(10 * 0.001);
+                    ((((float)current_measured_bits.current_branch_C_bits) * 3.3 / 4096 ) - (3.3 / 2))/(10 * 0.001) - currentC_offset_amps;
+                    //(((float)current_measured_bits.current_branch_C_bits * 0.08056640625) - 165) + currentA_offset_amps;
             current_measured_amps.current_branch_B_amps = 
-                    -(current_measured_amps.current_branch_A_amps + current_measured_amps.current_branch_C_amps) + I_OFFSET_B;
+                    -(current_measured_amps.current_branch_A_amps + current_measured_amps.current_branch_C_amps);
         }
     }
 
@@ -937,10 +1092,9 @@ namespace miosix {
     void PMACdriver::changeDirection(float direction) {
         vDutyCycle = direction;
     }
-void PMACdriver::calculateSpeed() {
-#ifdef SINUSOIDAL_DRIVE
-        PMACdriver::updateHallEffectSensorsValue();
-#endif // SINUSOIDAL_DRIVE
+
+    void PMACdriver::calculateSpeed() {
+        updateHallEffectSensorsValue();
         if (hallEffectSensors_oldPosition == hallEffectSensors_newPosition) {
             speedCounter++; // this will sum every 1/CONTROL_TIMER_FREQUENCY
             speedCalculationTimeout_Counter++;
@@ -1029,7 +1183,7 @@ void PMACdriver::calculateSpeed() {
         while ((SPI1->SR & SPI_SR_RXNE) != SPI_SR_RXNE) {
             timeoutCounter++;
             if (timeoutCounter >= 1000) {
-                return -1;
+                //return -1;
                 break;
             }
         }
@@ -1045,15 +1199,15 @@ void PMACdriver::calculateSpeed() {
     
     float PMACdriver::getTheta() {
         float theta = (float)getOrbisSensorValues();
-        if (theta >= 0){
+        //if (theta >= 0){
             theta = theta * M_TWOPI / 16384;
             theta += angularSlip * M_TWOPI / 1024;
             if (theta >= M_TWOPI) theta = M_TWOPI - theta;
             if (theta < 0) theta = 0 - theta;
             return theta;
-        }
-        else
-            return -1;
+        //}
+        //else
+        //    return -1;
     }
 
     float PMACdriver::updateElectricalAngularPosition() {
@@ -1113,14 +1267,20 @@ void PMACdriver::calculateSpeed() {
             time_phaseC = time_phaseB - X;
         }/* Sectors II and V */
         else if (((Y < 0) && (Z < 0)) || ((Y >= 0) && (Z >= 0))) {
-            time_phaseA = (T / 4) + (((T / 2) + Y - Z) / 2);
-            time_phaseB = time_phaseA + Z;
-            time_phaseC = time_phaseA - Y;
-        }/* Sectors III and VI */
-        else if (((Y < 0) && (Z >= 0) && (X > 0)) || ((Y >= 0) && (Z < 0) && (X <= 0))) {
+//            time_phaseA = (T / 4) + (((T / 2) + Y - Z) / 2);
+//            time_phaseB = time_phaseA + Z;
+//            time_phaseC = time_phaseA - Y;
             time_phaseA = (T / 4) + (((T / 2) + Y - X) / 2);
             time_phaseC = time_phaseA - Y;
             time_phaseB = time_phaseC + X;
+        }/* Sectors III and VI */
+        else if (((Y < 0) && (Z >= 0) && (X > 0)) || ((Y >= 0) && (Z < 0) && (X <= 0))) {
+//            time_phaseA = (T / 4) + (((T / 2) + Y - X) / 2);
+//            time_phaseC = time_phaseA - Y;
+//            time_phaseB = time_phaseC + X;
+            time_phaseA = (T / 4) + (((T / 2) + Y - Z) / 2);
+            time_phaseB = time_phaseA + Z;
+            time_phaseC = time_phaseA - Y;
         }
 
         dutyCycle_A = (time_phaseA / T);
@@ -1129,27 +1289,18 @@ void PMACdriver::calculateSpeed() {
 #else
         v_a = v_alpha;
         v_b = -(v_alpha * 0.5) + (v_beta * .8660254038);
-        v_c = -(v_alpha * 0.5) - (v_beta * .8660254038);
+        v_c = -(v_alpha * 0.5) - (v_beta * .8660254038);           
         
-        dutyCycle_A = ((v_a/busVoltage_volts)+1)/2;
-        dutyCycle_B = ((v_b/busVoltage_volts)+1)/2;
-        dutyCycle_C = ((v_c/busVoltage_volts)+1)/2;
+        dutyCycle_A = (v_a/busVoltage_volts)+0.5;
+        dutyCycle_B = (v_b/busVoltage_volts)+0.5;
+        dutyCycle_C = (v_c/busVoltage_volts)+0.5;
         
-        //if (dutyCycle_A > 0.99) dutyCycle_A = 0.99;
-        //if (dutyCycle_B > 0.99) dutyCycle_B = 0.99;
-        //if (dutyCycle_C > 0.99) dutyCycle_C = 0.99;
-        
-#endif
-                
-        //setADCTriggerPosition(1, 0.1 + (dutyCycle_A / 2));
+#endif  
         setADCTriggerPosition(1, dutyCycle_A);
         setHighSideWidth(1, dutyCycle_A);
         setHighSideWidth(2, dutyCycle_B);
         setHighSideWidth(3, dutyCycle_C);
-//        setHighSideWidth(1, 0.5);
-//        setHighSideWidth(2, 0.5);
-//        setHighSideWidth(3, 0.5);
-
+        
         return 1;
     }
 
@@ -1159,7 +1310,7 @@ void PMACdriver::calculateSpeed() {
 
         /* Store current in branch 1 and in branch 3 */
         
-        calculateShuntCurrent();
+        //calculateShuntCurrent();
 
         /* Clarke Transform */
         i_alpha = current_measured_amps.current_branch_A_amps;
@@ -1184,6 +1335,7 @@ void PMACdriver::calculateSpeed() {
         else directCurrent_integralError_0 = directCurrent_integralError_0 + ((ki_FOC * directCurrent_error_0) * (1 / (float)CONTROL_TIMER_FREQUENCY));
 
         sinusoidalDrive(v_qs, v_ds, theta);
+        //sinusoidalDrive(i_qs_ref, i_ds_ref, theta);   // Only for testing...
     }
 
     float PMACdriver::getFOCvariables(char variable) {
@@ -1362,4 +1514,27 @@ void PMACdriver::calculateSpeed() {
     void PMACdriver::voltageBusCalculation (){
         busVoltage_volts = (float)busVoltage_bits * 18.727272 * 3.3 / 4096;
     }
+    
+    void PMACdriver::currentReadingCalibration (){
+        
+        float offset_adder_A = 0;
+        float offset_adder_C = 0;
+        const int n = 10000;
+        
+        enableGate::high();
+        dc_cal::high();         // device shorts inputs of shunt amplifiers and disconnects loads
+        
+        for (int i = 0; i < n; i++){
+            offset_adder_A += ((((float)current_measured_bits.current_branch_A_bits) * 3.3 / 4096 ) - (3.3 / 2))/(10 * 0.001);
+            offset_adder_C += ((((float)current_measured_bits.current_branch_C_bits) * 3.3 / 4096 ) - (3.3 / 2))/(10 * 0.001);
+            usleep(100);
+        }
+        
+        currentA_offset_amps = offset_adder_A / n;
+        currentC_offset_amps = offset_adder_C / n;
+        
+        dc_cal::low();         // device shorts inputs of shunt amplifiers and disconnects loads
+        enableGate::low();
+    }
+    
 }
