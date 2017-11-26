@@ -220,7 +220,7 @@ void thread_SerialControl(void *argv) {
             speed = x/1000;
         }
 
-
+       
 #endif // SINUSOIDAL_DRIVE
 
 #else

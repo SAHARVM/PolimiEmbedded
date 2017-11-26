@@ -322,7 +322,7 @@ namespace miosix {
         /* Initialize motor driver specifics */
         setupHallSensors();
         enableGate::mode(Mode::OUTPUT); // TODO: Find a better place for this
-        faultPin::mode(Mode::INPUT); // Doesn't have a handler yet - TODO: IMPLEMENT HANDLER
+        faultPin::mode(Mode::INPUT);
         dc_cal::mode(Mode::OUTPUT);
         disableDriver(); // Must be enabled later to drive the power MOS gates
         setupControlTimer(CONTROL_TIMER_FREQUENCY); // TIM2 - Runs the control algorithm

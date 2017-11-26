@@ -1,0 +1,21 @@
+%*******************************************************
+% Abstract
+%*******************************************************
+%\renewcommand{\abstractname}{Abstract}
+\addcontentsline{toc}{chapter}{\abstractname}
+
+\pdfbookmark[1]{Abstract}{Abstract}
+\begingroup
+\let\clearpage\relax
+\let\cleardoublepage\relax
+\let\cleardoublepage\relax
+
+\chapter*{Abstract}
+
+The purpose of this thesis is to study the architecture of a commercial brushless motor driving circuit proposed by Texas Instruments and implemented as an electronic speed board as an "open source" project available online, analysing the advantages and disadvantages of such design regarding the implementation of trapezoidal and sinusoidal motor driving and speed and current control techniques for an unmanned vehicle designed for robotic agriculture. After this, the implementation of such driving and control techniques was physically carried out and tested.
+
+This thesis explains in details the most important parts regarding the physical implementation of a motor driving system in such a way that it can be fully replicated. Chapter \ref{chap:intro} contains some initial information regarding the electric motor history and the motivation to realize this work. In Chapter \ref{chap:problem}, we explain more in detail the different reasons why this work was developed and the focus points that were stressed out. In Chapter \ref{chap:theory}, a simple but sufficient explanation about the theory behind the electric motor is given, explaining also the different existing technologies and their particular driving methods. In Chapter \ref{chap:robi} we explain the study case of ROBI', a prototype mobile manipulator for agricultural applications, which uses the in-wheel motor for which the motor driver of this work was developed. In Chapter \ref{chap:implementation} we explain in deep detail all the work developed around the implementation of the motor driver, both in the software and the hardware fields. In Chapter \ref{chap:results} we explain the final results of the work, showing and comparing graphs and waveforms of the behaviour of the in-wheel motor driven by the system developed. Finally, on Chapter \ref{chap:conclusion}, we discuss the results of the work realized and propose a new system, based on the implementation of the researched architecture and the problems encountered while working on the project.
+
+
+\vfill
+\endgroup

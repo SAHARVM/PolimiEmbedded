@@ -1,0 +1,65 @@
+%*******************************************************
+% Titlepage
+%   the file is named in italian since our language 
+%   provide different words for different things and
+%   we should use them
+%*******************************************************
+\begin{titlepage}
+	% if you want the titlepage to be centered, uncomment and
+	% fine-tune the line below (KOMA classes environment)
+	% \begin{addmargin}[-1cm]{-3cm}
+    \begin{center}
+    	\large
+        \spacedlowsmallcaps{\myUni} \\
+        \bigskip\myFaculty \\
+        \medskip\mySchool \\
+    	\medskip\myDepartment \\
+    	\bigskip\myCourseFirstPart \\
+	    %\medskip\myCourseSecondPart \\  
+
+        \hfill
+
+        \vfill
+        
+        \begin{figure}[!h]
+			\begin{center}
+				\includegraphics[width=0.3\columnwidth]{Images/logoPoli.pdf} 
+			\end{center}
+		\end{figure}
+		
+		\vfill
+
+        \begingroup
+       		\LARGE	
+            \color{Maroon} \myTitle
+            \bigskip
+        \endgroup
+
+        \vfill
+
+		\flushleft 
+		\normalsize{Supervisor:}\\
+		\medskip\spacedlowsmallcaps{\mySupervisor}
+
+		\flushleft
+		\normalsize{Co-Supervisor:}\\
+		\medskip\spacedlowsmallcaps{\myOtherSupervisor}\\
+
+        \flushleft
+        \normalsize{Examiner:}\\
+        \medskip\spacedlowsmallcaps{\myExaminer}\\
+        
+        \vfill  
+        
+        \flushright
+        \normalsize{Master Graduation Thesis by:}\\
+        \medskip \spacedlowsmallcaps{\myFirstAuthorName}\\
+		Student Id n. \myMatrFirstAuthor \\
+		
+		\vfill 
+
+		\centering {\myAcademicYear}                     
+
+    \end{center}  
+  %\end{addmargin}       
+\end{titlepage}
