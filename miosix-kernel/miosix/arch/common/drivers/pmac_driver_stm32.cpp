@@ -619,29 +619,19 @@ namespace miosix {
             currentReadingFlag_3 = 0;
             if (vDirection == CW) {
                 if (hallEffectSensors_newPosition == 0b001) {
-                    
                     disablePWM(3);
-                    
                     setHighSideWidth (1,0);
                     setHighSideWidth(2, vDutyCycle);
-                    
                     enablePWM(1);
                     enablePWM(2);
-                    
                     currentReadingFlag_1 = 1;
-                    
                 } else if (hallEffectSensors_newPosition == 0b101) {
-                    
                     disablePWM(2);
-                    
                     setHighSideWidth (1,0);
                     setHighSideWidth(3, vDutyCycle);
-                    
                     enablePWM(1);
                     enablePWM(3);
-                    
                     currentReadingFlag_1 = 1;
-                    
                 } else if (hallEffectSensors_newPosition == 0b100) {
                     
                     disablePWM(1);
@@ -1105,15 +1095,14 @@ namespace miosix {
         } 
         else {
             speedCalculationTimeout_Counter = 0;
-        }
-        if ((hallEffectSensors_newPosition == 0b101)&&(hallEffectSensors_oldPosition == 0b001)) {
-            hall_effect_sensors_frequency = -CONTROL_TIMER_FREQUENCY / ((float) speedCounter);
-            speed_radiansPerSecond_electric = hall_effect_sensors_frequency * 2 * M_PI;
-            speedCounter = 0;
-        }
-        if ((hallEffectSensors_newPosition == 0b001)&&(hallEffectSensors_oldPosition == 0b101)) {
-            hall_effect_sensors_frequency = CONTROL_TIMER_FREQUENCY / ((float) speedCounter);
-            speed_radiansPerSecond_electric = hall_effect_sensors_frequency * 2 * M_PI;
+            if ((hallEffectSensors_newPosition == 0b101)&&(hallEffectSensors_oldPosition == 0b001)) {
+                hall_effect_sensors_frequency = -CONTROL_TIMER_FREQUENCY / ((float) speedCounter);
+                speed_radiansPerSecond_electric = hall_effect_sensors_frequency * 2 * M_PI;
+            }
+            else if ((hallEffectSensors_newPosition == 0b001)&&(hallEffectSensors_oldPosition == 0b101)) {
+                hall_effect_sensors_frequency = CONTROL_TIMER_FREQUENCY / ((float) speedCounter);
+                speed_radiansPerSecond_electric = hall_effect_sensors_frequency * 2 * M_PI;    
+            }
             speedCounter = 0;
         }
     }
@@ -1208,21 +1197,6 @@ namespace miosix {
         //}
         //else
         //    return -1;
-    }
-
-    float PMACdriver::updateElectricalAngularPosition() {
-
-        hallEffectSensors_forAngularCalculation_1 = hallEffectSensors_forAngularCalculation_0;
-        hallEffectSensors_forAngularCalculation_0 = getHallEffectSensorsValue();
-        if (hallEffectSensors_forAngularCalculation_0 != hallEffectSensors_forAngularCalculation_1) {
-            if (hallEffectSensors_forAngularCalculation_0 == 0b001) electricalAngle_0 = (M_TWOPI * 5 / 6);
-            else if (hallEffectSensors_forAngularCalculation_0 == 0b101) electricalAngle_0 = (M_TWOPI * 4 / 6);
-            else if (hallEffectSensors_forAngularCalculation_0 == 0b100) electricalAngle_0 = (M_TWOPI * 3 / 6);
-            else if (hallEffectSensors_forAngularCalculation_0 == 0b110) electricalAngle_0 = (M_TWOPI * 2 / 6);
-            else if (hallEffectSensors_forAngularCalculation_0 == 0b010) electricalAngle_0 = (M_TWOPI * 1 / 6);
-            else if (hallEffectSensors_forAngularCalculation_0 == 0b011) electricalAngle_0 = 0;
-        }
-        return M_TWOPI - electricalAngle_0;
     }
 
     float PMACdriver::getElectricalAngularPosition() {
@@ -1323,16 +1297,22 @@ namespace miosix {
         /* Quadrature Current Control*/
         quadratureCurrent_error_0 = i_qs_ref - i_qs;
         v_qs = ( quadratureCurrent_error_0 * kp_FOC ) + quadratureCurrent_integralError_0;
-        if (v_qs > busVoltage_volts) v_qs = busVoltage_volts;
-        else if (v_qs < -busVoltage_volts) v_qs = -busVoltage_volts;
-        else quadratureCurrent_integralError_0 = quadratureCurrent_integralError_0 + ((ki_FOC * quadratureCurrent_error_0) * (1 / (float)CONTROL_TIMER_FREQUENCY));
+        if (v_qs > busVoltage_volts) 
+            v_qs = busVoltage_volts;
+        else if (v_qs < -busVoltage_volts) 
+            v_qs = -busVoltage_volts;
+        else 
+            quadratureCurrent_integralError_0 = quadratureCurrent_integralError_0 + ((ki_FOC * quadratureCurrent_error_0) * (1 / (float)CONTROL_TIMER_FREQUENCY));
         
         /* Direct Current Control */
         directCurrent_error_0 = i_ds_ref - i_ds;
         v_ds = ( directCurrent_error_0 * kp_FOC ) + directCurrent_integralError_0;
-        if (v_ds > busVoltage_volts) v_ds = busVoltage_volts;
-        else if (v_ds < -busVoltage_volts) v_ds = -busVoltage_volts;
-        else directCurrent_integralError_0 = directCurrent_integralError_0 + ((ki_FOC * directCurrent_error_0) * (1 / (float)CONTROL_TIMER_FREQUENCY));
+        if (v_ds > busVoltage_volts) 
+            v_ds = busVoltage_volts;
+        else if (v_ds < -busVoltage_volts) 
+            v_ds = -busVoltage_volts;
+        else 
+            directCurrent_integralError_0 = directCurrent_integralError_0 + ((ki_FOC * directCurrent_error_0) * (1 / (float)CONTROL_TIMER_FREQUENCY));
 
         sinusoidalDrive(v_qs, v_ds, theta);
         //sinusoidalDrive(i_qs_ref, i_ds_ref, theta);   // Only for testing...

@@ -1,6 +1,8 @@
 \chapter{Motor Control Theory} \label{chap:theory}
 
-In this chapter, we will review some theoretical principles that concern us regarding motor control. First, we will review the physical principles that rule over the electric motors and we will explain the different motor technologies and its configurations, focusing in the \acf{PMAC} motors. Later, we will review the motor drives, the configuration of a driver and the different driving techniques for the \ac{PMAC} motors. Finally, we will explain the most common control methods that can be applied to them.
+In this chapter, we will review the theoretical principles that concern us regarding motor control. First, we will review the physical principles that rule over the electric motors and we will explain the different motor technologies and its configurations, focusing in the \acf{PMAC} motors. Later, we will review the motor drives, the configuration of a driver and the different driving techniques for the \ac{PMAC} motors. Finally, we will explain the most common control methods that can be applied to them.
+
+Even if this chapter might seem too overwhelming due charge of theory contained on it, all the theory explained on it will help us develop the brushless motor driver for which this thesis is developed.
 
 Most of the theory in this chapter was taken from the book \citetitle{sistemi_di_controllo:2007}, by \citeauthor{sistemi_di_controllo:2007}, \citeyear{sistemi_di_controllo:2007} and from the compilation \citetitle{AC_drives}, by \citeauthor{AC_drives}, \citeyear{AC_drives}, as well as from the \citetitle{GhioniPowerElec}, by \citeauthor{GhioniPowerElec}, \citeyear{GhioniPowerElec}.
 
@@ -125,10 +127,21 @@ Given that the magnetic fields can be generated both by permanent magnets and by
 If we consider the loop from Figure \ref{fig:lorentz_law} and Equation \ref{eq:B_1}, we can see that there is a magnetic field generated around the loop as seen in Figure \ref{fig:alignment}, and due to the alignment principle, we will get the strongest coupling torque when the magnetic fields are perpendicular to each other.
 
 \begin{figure}[htbp]
-\centering
-\includegraphics[width=8cm]{Images/alignment.png} 
-\caption[Alignment Principle]{Visual explanation of the alignment principle. The alignment torque is the largest in the configuration of figure B and nule in the configuration of figure C.}
-\label{fig:alignment}
+	\centering
+    \subfloat[$\delta = \pi/2$\label{subfig-1:alignment_1}]{%
+    	\includegraphics[width=0.28\textwidth]{Images/alignment_1.png}
+    }
+    \hfill
+    \subfloat[$\delta = \pi/4$\label{subfig-2:alignment_2}]{%
+      	\includegraphics[width=0.34\textwidth]{Images/alignment_2.png}
+    }
+    \hfill
+    \subfloat[$\delta = 0$\label{subfig-3:alignment_3}]{%
+      	\includegraphics[width=0.28\textwidth]{Images/alignment_3.png}
+    }
+    \caption{Visual explanation of the alignment principle. In this Figure we can see the side $bc$ of the loop from Figure \ref{fig:lorentz_law}, which is spinning around the $y$ axis. The alignment torque between $B$ and $B'$ is the largest in the configuration \ref{subfig-1:alignment_1} and nule in the configuration \ref{subfig-3:alignment_3}.}
+    \label{fig:alignment}
+    %https://www.basilnetworks.com/article/motors/brushlessmotors.html
 \end{figure}
 
 In the case of electrical motors, there are two different magnetic fields generated in the airgap due to the permanent magnets or to the windings placed in the stator and the rotor which can be considered in radial direction, described by two magnetic fields $B_{r}(\theta,t)$ and $B_{s}(\theta,t)$, from which interaction we get the electromechanical conversion, since we have the generation of a torque which tends to align the two fields angles where they have the largest intensity. The alignment torque will be an expression of the type:
@@ -262,7 +275,7 @@ The number of commutations needed to generate one revolution of the rotor is det
 which also represents a relationship between the mechanical speed of the rotor and the electrical speed of commutation, which is defined by the commutation frequency:
 
 \begin{equation}
-	\label{eq:pole_pairs}
+	\label{eq:pole_pairs_2}
 	\omega_{electrical} = f_{commutation} = \ac{PP} \cdot \omega_{mechanical}
 \end{equation}
 
@@ -354,7 +367,7 @@ The commutation of the polarities in the windings of the \ac{PMAC} motors is don
 \label{fig:inverter_2}
 \end{figure}
 
-This three-phase inverter configuration consists on 3 branches with 2 switches each one. The middle point betwee the two switches in each branch is connected to each one of the phases of the motor. To feed the coils of the motor, we need to activate the switches in such a way that the current comes into one of the phases an comes out through another phase. For example, if we want to feed a current through phase $U$ and we need it to come out though phase $V$ to generate a magnetic field in a certain angle, we would enable switches $S1$ and $S6$, having a phase-to-phase voltage in the $U$ and $V$ coils equal to $V_{DC}$. The correct feeding sequence should be synchronous with the rotor position to generate an angular rotation of the rotor with the lowest possible torque ripple.
+This three-phase inverter configuration consists on 3 branches with 2 switches each one. The switch connected to $V_{DC}$ is called high-side switch, while the switch connected to $0V$ is called low-side switch. The middle point betwee the two switches in each branch is connected to each one of the phases of the motor. To feed the coils of the motor, we need to activate the switches in such a way that the current comes into one of the phases an comes out through another phase. For example, if we want to feed a current through phase $U$ and we need it to come out though phase $V$ to generate a magnetic field in a certain angle, we would enable switches $S1$ and $S6$, having a phase-to-phase voltage in the $U$ and $V$ coils equal to $V_{DC}$. The correct feeding sequence should be synchronous with the rotor position to generate an angular rotation of the rotor with the lowest possible torque ripple.
 
 The switching in the three-phase inverter is made by transistors as seen in Figure \ref{fig:inverter_1}. The transistors are chosen accordingly to the power requirements of the application on which the inverter is being used. If the \ac{DC} voltage is lower than $1000 V$ and the current is lower than $100 A$, it is recommended to use the Power \acf{MOSFET} technology. If the power consumption of the motor is larger, different technologies should be considered, like the \acf{IGBT}.
 
@@ -421,9 +434,8 @@ Knowing the amount of current that is circulating through the motor windings can
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=10cm]{Images/shunt_amp.png} 
+\includegraphics[width=5cm]{Images/shunt_amp.png} 
 \caption[Shunt Resistance Current Detection]{Measurement of the current flowing through a load using a shunt resistance}
-%http://www.electronics-tutorials.ws/electromagnetism/mag31.gif
 \label{fig:shunt_amp}
 \end{figure}
 
@@ -445,7 +457,7 @@ where G is the gain of the voltage amplifier.
 
 The last piece on the motor drive is the controller, which executes all the logic behind the commutation of the inverter, in order to generate a synchronous driving. Previously, motor controllers were made by analog electronic circuits. Nowadays, these controllers are implemented using digital circuits that can be programmed, like microcontrollers.
 
-The microcontroller has the task to run the logic that generates a driving signal for the inverter which will depend in the desired dynamic conditions and the actual conditions of the motor, which are sensed and stored by the microcontroller.
+The microcontroller has the task to run embedded software that contains the logic that generates a driving signal for the inverter which will depend in the desired dynamic conditions and the actual conditions of the motor, which are sensed and stored by the microcontroller.
 
 For example, if we need to drive a motor at a desired reference speed, we need to apply a synchronous voltage signal into its coils. To generate a voltage that is synchronous to the angular position of the magnetic field, we will need to start by defining the absolute angular position of the shaft and, after this, we can apply a voltage into the coils by switching on the respective transistors of the inverter. This voltage will generate a current that will generate a torque and a magnetic field that will interact with the rotor, starting to spin it and, with this, generating a \ac{BEMF}. As the rotor spins, we must keep reading its angular position, to determine the correct driving voltage needed to keep it spinning and the correct commutation of the transistors in the inverter. As the motor keeps moving, everytime faster, we need to calculate the speed at which the rotor is spinning, so as the rotor approaches the desired angular speed, we must increase or reduce the commutating frequency of the inverter, closing the speed loop. All these tasks must be made automatically by the microcontroller in a matter of microseconds.
 
@@ -453,9 +465,9 @@ The microcontroller handles also the interface between other devices, allowing u
 
 \section{PMAC Motors Driving Methods}\label{section:driving_methods}
 
-Due to the different configurations of the coils between \ac{BLDC} and \ac{PMSM} motors, there are two methods to apply a voltage into the coils, depending on the generated \ac{BEMF}. To obtain the best torque using a simple driving method in \ac{BLDC} motors, we can apply the Trapezoidal Driving method, which is the driving method for which \ac{BLDC} motors are designed. This method can also be used in the \ac{PMSM} motors, but it won't allow us to obtain the best torque available for this motor technology. To obtain a better torque in both motors, we can apply the Sinusoidal Driving method, which allow us to have a better current density, mainly in the \ac{PMSM} motor. 
+Due to the different configurations of the coils between \ac{BLDC} and \ac{PMSM} motors, there are two methods to apply a voltage into the coils, depending on the generated \ac{BEMF}. To obtain the best torque using a simple driving method in \ac{BLDC} motors, we can apply the Trapezoidal Driving method, which is the driving method for which \ac{BLDC} motors are designed. This method can also be used in the \ac{PMSM} motors, but it won't allow us to obtain the best torque available for this motor technology. To obtain a better torque in both motors, we can apply the Sinusoidal Driving method, which allows to have a better current density, mainly in the \ac{PMSM} motor, but it also implies a more complex and expensive hardware architecture and the implementation of a more complex algorithm as we will see in the following. 
 
-\subsection{Trapezoidal Drive}
+\subsection{Trapezoidal Drive}\label{subsection:trapdrive}
 
 % Most of the theory is obtained from the Microchip application note
 
@@ -478,29 +490,29 @@ The trapezoidal drive is intended to create a trapezoidal \ac{BEMF}, as the name
 \begin{tabular}{|c|C|C|C|c|c|C|C|C|}
 \hline
 \multicolumn{9}{|c|}{Clockwise Direction} \\ \hline \hline
-\multirow{2}{*}{Sequence \#} & \multicolumn{3}{c|}{Hall Sensor Input} & \multicolumn{2}{c|}{Active Gates} & \multicolumn{3}{c|}{Phase Current} \\ \cline{2-9} 
+\multirow{2}{*}{Step \#} & \multicolumn{3}{c|}{Hall Sensor Input} & \multicolumn{2}{c|}{Active Gates} & \multicolumn{3}{c|}{Phase Voltage} \\ \cline{2-9} 
   & A & B & C & High Side & Low Side & A & B & C \\ \hline \hline
-1 & 1 & 0 & 0 & $Q_B+$ & $Q_A-$ & DC- & DC+ & Off       \\ \hline
-2 & 1 & 0 & 1 & $Q_C+$ & $Q_A-$ & DC- & Off & DC+       \\ \hline
-3 & 0 & 0 & 1 & $Q_C+$ & $Q_B-$ & Off & DC- & DC+       \\ \hline
-4 & 0 & 1 & 1 & $Q_A+$ & $Q_B-$ & DC+ & DC- & Off       \\ \hline
-5 & 0 & 1 & 0 & $Q_A+$ & $Q_C-$ & DC+ & Off & DC-       \\ \hline
-6 & 1 & 1 & 0 & $Q_B+$ & $Q_C-$ & Off & DC+ & DC-       \\ \hline \hline
+1 & 1 & 0 & 0 & $H2$ & $L1$ & $0V$ 		& $V_{DC}$ 	& -       	\\ \hline
+2 & 1 & 0 & 1 & $H3$ & $L1$ & $0V$ 		& - 		& $V_{DC}$  \\ \hline
+3 & 0 & 0 & 1 & $H3$ & $L2$ & - 		& $0V$ 		& $V_{DC}$  \\ \hline
+4 & 0 & 1 & 1 & $H1$ & $L2$ & $V_{DC}$ 	& $0V$ 		& -       	\\ \hline
+5 & 0 & 1 & 0 & $H1$ & $L3$ & $V_{DC}$ 	& - 		& $0V$      \\ \hline
+6 & 1 & 1 & 0 & $H2$ & $L3$ & - 		& $V_{DC}$ 	& $0V$      \\ \hline \hline
 \multicolumn{9}{|c|}{Counter-Clockwise Direction} \\ \hline \hline
-\multirow{2}{*}{Sequence \#} & \multicolumn{3}{c|}{Hall Sensor Input} & \multicolumn{2}{c|}{Active Gates} & \multicolumn{3}{c|}{Phase Current} \\ \cline{2-9} 
+\multirow{2}{*}{Sequence \#} & \multicolumn{3}{c|}{Hall Sensor Input} & \multicolumn{2}{c|}{Active Gates} & \multicolumn{3}{c|}{Phase Voltage} \\ \cline{2-9} 
   & A & B & C & High Side & Low Side & A & B & C \\ \hline \hline
-1 & 1 & 0 & 0 & $Q_A+$ & $Q_B-$ & DC+ & DC- & Off       \\ \hline
-2 & 1 & 0 & 1 & $Q_A+$ & $Q_C-$ & DC+ & Off & DC-       \\ \hline
-3 & 0 & 0 & 1 & $Q_B+$ & $Q_C-$ & Off & DC+ & DC-       \\ \hline
-4 & 0 & 1 & 1 & $Q_B+$ & $Q_A-$ & DC- & DC+ & Off       \\ \hline
-5 & 0 & 1 & 0 & $Q_C+$ & $Q_A-$ & DC- & Off & DC+       \\ \hline
-6 & 1 & 1 & 0 & $Q_C+$ & $Q_B-$ & Off & DC- & DC+       \\ \hline
+1 & 1 & 0 & 0 & $H1$ & $L2$ & $V_{DC}$ 	& $0V$ 		& -       	\\ \hline
+2 & 1 & 0 & 1 & $H1$ & $L3$ & $V_{DC}$ 	& - 		& $0V$      \\ \hline
+3 & 0 & 0 & 1 & $H2$ & $L3$ & - 		& $V_{DC}$ 	& $0V$      \\ \hline
+4 & 0 & 1 & 1 & $H2$ & $L1$ & $0V$ 		& $V_{DC}$ 	& -       	\\ \hline
+5 & 0 & 1 & 0 & $H3$ & $L1$ & $0V$ 		& - 		& $V_{DC}$  \\ \hline
+6 & 1 & 1 & 0 & $H3$ & $L2$ & - 		& $0V$ 		& $V_{DC}$  \\ \hline
 \end{tabular}
   \label{tab:drive_sequence}
 \end{center}
 \end{table}
 
-The six-step commutation is produced by following the sequence described in Table \ref{tab:drive_sequence}, which depends on the rotor position, which is defined by the Hall effect sensors, and on the expected direction of rotation. This sequence generates a current circulation like the one explained in Figure \ref{fig:six_step_coils}, which produces a \ac{BEMF} and a torque like the one shown in Figure \ref{fig:six_step}. We can see that the torque in Figure \ref{fig:six_step} presents a ripple due to the non-continuous shape of the current in the coils, generated by the rectangular commutation of the six-step sequence. This current shape is defined by the electrical model of the coils of an electric motor, which follows a model similar to the one described in Figure \ref{fig:eq_motor} and Equation \ref{eq:KVL_coil_time}.
+The six-step commutation is produced by following the sequence described in Table \ref{tab:drive_sequence}, which depends on the rotor position, which is obtained by the Hall effect sensors, and on the expected direction of rotation. This sequence generates a current circulation like the one explained in Figure \ref{fig:six_step_coils}, which produces a \ac{BEMF} and a torque like the one shown in Figure \ref{fig:six_step}. We can see that the torque in Figure \ref{fig:six_step} presents a ripple due to the non-continuous shape of the current in the coils, generated by the rectangular commutation of the six-step sequence. This current shape is defined by the electrical model of the coils of an electric motor, which follows a model similar to the one described in Figure \ref{fig:eq_motor} and Equation \ref{eq:KVL_coil_time}.
 
 \begin{figure}[htbp]
 \centering
@@ -516,7 +528,7 @@ The six-step commutation is produced by following the sequence described in Tabl
 \label{fig:six_step}
 \end{figure}
 
-Due to the synchronous configuration of the \ac{PMAC} motors, the six-step commutation frequency is defined by the rotation speed and not vice versa, unlike in induction motors. Instead, to reduce the rotation speed, we need to reduce the current flowing through the windings by reducing the voltage applied into the windings, following Equation \ref{eq:speed_1}. To achieve this with the inverter, we must follow the six-step sequence applying a \ac{PWM} signal into the gates of the transistors with a frequency higher than the inverse of the time constant $\tau = L/R$ of the motor, which is much higher than the six-step commutating frequency. By doing this we apply an average voltage $D\cdot V_{DC}$ into the windings, where $D$ is the duty cycle of the \ac{PWM} signal.
+Due to the synchronous configuration of the \ac{PMAC} motors, the six-step commutation frequency is defined by the rotation speed and not vice versa, unlike in induction motors. Instead, to reduce the rotation speed, we need to reduce the current flowing through the windings by reducing the voltage applied into the windings, following Equation \ref{eq:speed_1}. To achieve this with the inverter, we must follow the six-step sequence applying a \ac{PWM} signal into the gates of the transistors with a frequency higher than the inverse of the time constant $\tau = L/R$ of the motor windings, which is much higher than the six-step commutating frequency. By doing this we apply an average voltage $D\cdot V_{DC}$ into the windings, where $D$ is the duty cycle of the \ac{PWM} signal.
 
 \begin{figure}[htbp]
 \centering
@@ -525,7 +537,7 @@ Due to the synchronous configuration of the \ac{PMAC} motors, the six-step commu
 \label{fig:dutycycle}
 \end{figure}
 
-The simplest way to do this is by applying the \ac{PWM} signal to either the high-side transistor or to the low-side transistor. Due to the recirculation diodes, the voltage in the windings energised would commutate from $V_{DC}$ to $0V$, as in a step-down voltage converter. A more complete approach to applying the six-step sequence with a lower voltage than $V_{DC}$ to obtain a slower speed, would be to apply a complementary PWM signal to the low-side transistor on the same branch of the high-side transistor indicated on the sequence, while the low-side transistor indicated on the sequence stays enabled, as seen in Figure \ref{fig:X_1}. This approach would allow us to brake the motor, enabling also the regenerative braking, since, by applying a complementary signal to the high-side transistor in the low-side transistor, we are allowing the flow of current not only from the power supply to the motor, but also from the motor to the power supply.
+The simplest way to do this is by applying the \ac{PWM} signal to either the high-side transistor or to the low-side transistor. Due to the recirculation diodes, the voltage in the windings energised would commutate from $V_{DC}$ to $0V$, as in a step-down voltage converter. A more complete approach to applying the six-step sequence with a lower voltage than $V_{DC}$ to obtain a slower speed, would be to apply a complementary \ac{PWM} signal to the low-side transistor on the same branch of the high-side transistor indicated on the sequence, while the low-side transistor indicated on the sequence stays enabled, as seen in Figure \ref{fig:X_1}. This approach would allow us to brake the motor, enabling also the regenerative braking, since, by applying a complementary signal to the high-side transistor in the low-side transistor, we are allowing the flow of current not only from the power supply to the motor, but also from the motor to the power supply.
 
 \subsection{Sinusoidal Drive}\label{subsection:sinusoidal_drive}
 
@@ -561,7 +573,7 @@ As we have seen previously, there is a strong dependence between the rotating sp
 \label{fig:ele_mech_dyn}
 \end{figure}
 
-\subsection{Speed Control}
+\subsection{Speed Control}\label{sub:speed_control}
 
 The speed control loop of an electric motor is achieved by means of applying a driving voltage into the motor coils, porportional to the error signal between a reference speed and the measured speed. This driving voltage is obtained by means of a \acf{PI} controller. The \ac{PI} controller creates a driving signal that is calculated by adding two signals. The first signal is the proportional error, which is equal to the error $\varepsilon$ multiplied by a proportionality constant $K_{p}$. The second signal is the integral error, which is equal to the error $\varepsilon$ multiplied by an integral constant $K_{i}$ integrated over the time that the algorithm has been running (Figure \ref{fig:pi_controller}).
 
@@ -600,7 +612,13 @@ where we can see that the torque applied by the motor is equal to the current fl
 
 \subsection{Field Oriented Control}
 
-The \acf{FOC} or Vector Control, is technique that is applied with aims of controlling the current (and therefore the torque) of the \ac{PMAC} motor in the same way that the current of a \ac{DC} motor is controlled. This is done because the \ac{DC} motor has the advantage that, in any case, the magnetic field of the rotor is always synchronized with the magnetic field of the permanent magnets attached to its stator due to the mechanical commutators, which makes it very easy to control. Instead, the \ac{PMAC} motors must be synchronized by means of applying different driving algorithms depending on the rotor angular position, as mentioned before in this chapter. To achieve this, we need to make variable transformations to the voltage and current values of the system in order to control the system using only two variables: the quadrature current $I_{q}$ and the direct current $I_{d}$.
+The \acf{FOC} or Vector Control, is technique that is applied with aims of controlling the current (and therefore the torque) of the \ac{PMAC} motor in the same way that the current of a \ac{DC} motor is controlled. This is done because the \ac{DC} motor has the advantage that, in any case, the magnetic field of the rotor is always synchronized with the magnetic field of the permanent magnets attached to its stator due to the mechanical commutators, which makes it very easy to control. Instead, the \ac{PMAC} motors must be synchronized by means of applying different driving algorithms depending on the rotor angular position, as mentioned before in this chapter. 
+
+To achieve a current control on the \ac{PMAC} motors that is similar to the one on \ac{DC} motors, we need to make mathematical transformations to the voltage and current values and controller variables of the system in order to control the motor using only two variables: a direct current $I_{d}$ and a quadrature current $I_{q}$.
+
+The direct current $I_{d}$ is a vector that is facing always in the same direction of the north-pole of the magnetic field of the rotor, while the quadrature current vector $I_{q}$ is displaced from the direct current vector by 90\degree. Due to this angular displacement, we can control the current and the direction of rotation by simply changing $I_{q}$, as in a \ac{DC} motor we would only need to reduce the armature current in order to reduce the torque, which is the scope of the \ac{FOC}, since the maximum torque generation of any electric motor is when the magnetic fields of the rotor and the stator are displaced between each other by 90\degree.
+
+The control of the direct current vector $I_{d}$ allows the implementation of "flux weakening", which is a technique that aims to push the angular speed of the electric motor beyond its rated speed by reducing the strength of the magnetic field $B$, in order to reduce the generated \ac{BEMF}, which limits the current flow in the windings. If a larger current circulates through the windings, a larger torque is developed, reaching a higher speed until the \ac{BEMF} increases, preventing the current to keep increasing. By this point the electric motor is running at a higher speed but at a lower torque.
 
 \begin{figure}[htbp]
 \centering
@@ -609,7 +627,7 @@ The \acf{FOC} or Vector Control, is technique that is applied with aims of contr
 \label{fig:foc_current}
 \end{figure}
 
-To achieve the \ac{FOC} we start by transforming the current signals that we acquire from the current sensors using the Clarke Transformation, which converts the three current phasors of the motor into two equivalent currents based on the $\alpha$ and $\beta$ axis:
+To achieve the \ac{FOC} we start by transforming the current signals that we acquire from the current sensors using the Clarke Transformation, which converts the three current phasors of the motor into two equivalent currents located on the $\alpha$ and $\beta$ axis:
 
 \[
 \begin{bmatrix}
@@ -629,7 +647,7 @@ i_{c}
 \end{bmatrix}
 \]
 
-After this, in order to have two currents that don't change in function of the angular position of the rotor $\theta$, we apply the Park Transformation, which converts the currents $i_{\alpha}$ and $i_{\beta}$ into two currents that are based into an axis that rotates with the same angle as the rotor:
+After this, in order to obtain $I_{d}$ and $I_{q}$, which don't change in function of the angular position of the rotor $\theta$, we apply the Park Transformation, which converts the currents $i_{\alpha}$ and $i_{\beta}$ into two currents that are mounted into an axis that rotates with the same angle as the rotor:
 
 \[
 \begin{bmatrix}
@@ -667,7 +685,7 @@ V_{q}
 \end{bmatrix}
 \]
 
-and then, the Inverse Clark Transform:
+and then, the Inverse Clarke Transform:
 
 \[
 \begin{bmatrix}
@@ -688,7 +706,7 @@ v_{\beta}
 \end{bmatrix}
 \]
 
-Finally, we apply these  $v_{a}$, $v_{b}$ and $v_{c}$ values and apply them to the inverter applying the sinusoidal drive method explained in \ref{subsection:sinusoidal_drive}.
+Finally, we apply these  $v_{a}$, $v_{b}$ and $v_{c}$ values to the inverter applying the sinusoidal drive method explained in \ref{subsection:sinusoidal_drive}.
 
 \subsection{Speed Control with Field Oriented Control}
 
