@@ -51,7 +51,7 @@ In order to take advantage of the sinusoidal distribution of the windings of thi
 \label{fig:orbis_pulley}
 \end{figure}
 
-The angular position sensor is an Orbis magnetic encoder, manufactured by RLS. This is a magnetic encoder which works by reading the orientation of the magnetic field of a permanent magnet attached to a shaft, as explained in \ref{subsection:angular_sensors}. The encoder has a resolution of 14 bits with a sensitivity of $\pm0.3$\degree and transmits the angular position information through a modified \acf{SPI} called \acf{SSI}, which sends the 14 bits in \ac{SPI} slave write-only mode through an RS422 transceiver. 
+The angular position sensor is an Orbis magnetic encoder, manufactured by RLS. This is a magnetic encoder which works by reading the orientation of the magnetic field of a permanent magnet attached to a shaft, as explained in \ref{subsection:angular_sensors}. The encoder has a resolution of 14 bits with a sensitivity of $\pm0.3$\degree and transmits the angular position information through a modified \acf{SPI} called \acf{SSI}, which sends the 24 bits in slave write-only mode through an $RS422$ transceiver. 
 
 In this case, the shaft of the sensor is not the shaft of the rotor, but it's the shaft of the pulley system. This transmission system has a 4.6 size ratio due to the space constraints of the system. This motor includes three Hall effect sensors, even if it's a \ac{PMSM} motor, as mentioned in \ref{subsection:angular_sensors}.
 

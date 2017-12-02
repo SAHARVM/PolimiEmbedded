@@ -15,7 +15,7 @@ The VESC board was conceived and designed to be used as an \ac{ESC} in electric 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=10cm]{Images/pcb_front.png} 
-\caption[VESC Front Side]{Front Side of the VESC Board. The three wires at soldered at the right edge of the board are connected to the three phases of the brushless motor.}
+\caption[VESC Front Side]{Front Side of the VESC Board. The three wires at soldered at the right edge of the board are connected to the three phases of the brushless motor  (\citeauthor{VedderVesc}, \citeyear{VedderVesc}).}
 \label{fig:pcb_front}
 \end{figure}
 
@@ -124,7 +124,9 @@ Drain-to-Source on-resistance & $1.5m\Omega$ \\
 
 This \ac{MOSFET} is based on the HEXFET Power \ac{MOSFET} technology, which is a Vertical Double-diffused MOS transistor (VDMOS) with hexagonal elementary cells in parallel which maximizes the $W/L$ ratio of the transistor, providing a low on-resistance value $R_{DS(ON)}$ (\citeauthor{GhioniPowerElec}, \citeyear{GhioniPowerElec}).
 
-We can see from Table \ref{table:irf_ranges} that the maximum power dissipation of the \ac{MOSFET} is lower than the rated power of the in-wheel motors mounted on ROBI', therefore, the maximum rated values of the motor won't be reached using this model of transistors. It is also important to note that the maximum power dissipation implies a junction temperature of $25\degree C$, which means that the heat of the \ac{MOSFET} package should be dissipated by a heat sink, which is not implemented nor considered in the VESC board. If the heat is not dissipated from the transistors, the power decreases following the linear derating factor.
+%We can see from Table \ref{table:irf_ranges} that the maximum power dissipation of the \ac{MOSFET} is lower than the rated power of the in-wheel motors mounted on ROBI', therefore, the maximum rated values of the motor won't be reached using this model of transistors. 
+
+It is important to note that the maximum power dissipation implies a junction temperature of $25\degree C$, which means that the heat of the \ac{MOSFET} package should be dissipated by a heat sink, which is not implemented nor considered in the VESC board. If the heat is not dissipated from the transistors, the power dissipation capacity of the transistor decreases following the linear derating factor.
 
 \subsubsection{Switching Times}\label{switching_times}
 
@@ -336,7 +338,7 @@ There are three LED indicators that can be used to visually determine the status
 
 There is a port provided to connect an RC servomotor to the board, which is connected to a free \ac{PWM} port on the microcontroller. This port can also be used for other purposes. For example, in this project, the port was used in order to visualize signals with the aid of an oscilloscope.
 
-\subsection{Angular Position Sensor}
+\subsection{Angular Position Sensor}\label{sub:gears}
 
 As mentioned in Chapter \ref{chap:robi}, the angular position sensor of the rotor is determined by the Orbis absolute rotation magnetic encoder. 
 
@@ -359,7 +361,14 @@ The solution to this problem was to change the transmission size ratio from 4.6 
 
 The system was implemented as a gear transmission instead of a pulley, since the small gear size didn't allow a propper setup using the pulley. This brings the sensor closer to the ground, which was one of the things that was avoided by the pulley system, so further development on this topic should be done.
 
-%Include pictures
+\vfill
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=12cm]{Images/pictures/pic2.png} 
+\caption[New angular position transmission system]{New angular position transmission system}
+\label{fig:pic2}
+\end{figure}
+\vfill
 
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -391,7 +400,7 @@ For the \ac{WMU} development, we decided not to keep working with the source cod
 
 \subsection{Operating System}
 
-An embedded system can run without an operating system if the tasks that are going to be executed on it are simple. For this project we decided to use an existent embedded operating system with aims to help us with the implementation of many functions that might need to run in parallel.
+An embedded system can run without an \acf{OS} if the tasks that are going to be executed on it are simple. For this project we decided to use an existent embedded \ac{OS} with aims to help us with the implementation of many functions that might need to run in parallel.
 
 \begin{figure}[htbp]
 \centering
@@ -400,17 +409,17 @@ An embedded system can run without an operating system if the tasks that are goi
 \label{fig:threads_flow}
 \end{figure}
 
-The operating system chosen to be implemented in this project was Miosix. Miosix is an OS kernel designed to run on $32bit$ microcontrollers, in active development since 2008. Miosix supports \texttt{C++}, which allows the implementation of embedded software with an objects-oriented architecture. Due to the use of \texttt{C++}, it also supports both a single process and multiple threads application models, which simplifies the implementation of threads for this project (\citeauthor{miosix}, \citeyear{miosix}). Miosix was chosen due to its support for the STM32 microcontrollers.
+The \ac{OS} chosen to be implemented in this project was Miosix. Miosix is an OS kernel designed to run on $32bit$ microcontrollers, in active development since 2008. Miosix supports \texttt{C++}, which allows the implementation of embedded software with an objects-oriented architecture. Due to the use of \texttt{C++}, it also supports both a single process and multiple threads application models, which simplifies the implementation of threads for this project (\citeauthor{miosix}, \citeyear{miosix}). Miosix was chosen due to its support for the STM32 microcontrollers.
 
 Three threads were implemented, using Miosix multi-thread support, with aims to simplify the implementation of the motor control algorithms, running along with the communication protocol between the \ac{WMU} and a \acf{UI}. Later on, the implementation of new threads can be done to control \ac{CAN} communications or other new functionalities and algorithms. The first thread implemented in this project controls the communication though an \acf{UART} port, which can be connected to a computer with the implemented \ac{UI} or to another board with aims to control the reference values of the motor control algorithms or to monitor the different variables of the system. The \ac{UART} port was configured in the Miosix environment to be used as in a computer based \texttt{C++} environment, by the use of the \texttt{iostream.h} library commands, \texttt{cin} and \texttt{cout}, in such way that we don't have to worry about configuring the \ac{UART} related registers. Also, while the system is expecting an input value after using the \texttt{cin} command, the thread blocks itself until it receives the expected input. The second thread runs the speed control algorithm. A third thread was implemented only to toggle a LED every second in order to detect if the system is correctly running or if there is any error with the board.
 
 \subsection{Pulse Width Modulated Signal Generation}
 
-The microcontroller family $STM32F4$ has two timers that are designed to be able to control three-phase motor inverters. For this, the microntroller is able to generate two complementary \ac{PWM} signals in three differenc channels for each timer, intended to command the high-side and the low-side signals of a power inverter driver as the $DRV8302$. These timers are called "advanced timers", and are identified as $TIM1$ and $TIM8$ (\citeauthor{stm32}, \citeyear{stm32}).
+The microcontroller family $STM32F4$ has two timers that are designed to be able to control three-phase motor inverters. For this, the microntroller is able to generate two complementary \ac{PWM} signals in three different channels for each timer, intended to command the high-side and the low-side signals of a power inverter driver as the $DRV8302$. These timers are called "advanced timers", and are identified as $TIM1$ and $TIM8$ (\citeauthor{stm32}, \citeyear{stm32}). The board connects the \ac{PWM} outputs from timer $TIM1$ to the driver.
 
-A \ac{PWM} signal is defined by a frequency and a duty cycle, as seen in Chapter \ref{chap:theory}. The actual implementation of the \ac{PWM} signal depends on five variables: a counting frequency, a counter, a compare value, a top value and an output signal. The counter normally starts from zero and the compare value should be smaller than the top value, both larger than zero. The output signal is a digital reference signal, which starts as set (high) when the \ac{PWM} signal is enabled. This output signal is usually the \ac{PWM} signal generated. When the \ac{PWM} counter is enabled, the output signal is set and the counter starts increasing its value at the counting frequency until it reaches the compare value, which resets the output signal (low). After this, the counter keeps increasing its value until it reaches the top value, setting again the output signal (high). After the counter reaches the top value, it counts down or starts from zero, depending on the \ac{PWM} mode.
+A \ac{PWM} signal is defined by a frequency and a duty cycle, as seen in Chapter \ref{chap:theory}. The actual implementation of the \ac{PWM} signal depends on five variables: a counting frequency, a counter, a compare value, a top value and an output signal. The counter normally starts from zero and the compare value should be smaller than the top value, both larger than zero. The output signal is a digital reference signal, which starts as set (high) when the \ac{PWM} signal is enabled. This output signal is usually the \ac{PWM} signal generated. When the \ac{PWM} counter is enabled, the output signal is set and the counter starts increasing its value at the counting frequency until it reaches the compare value, which resets the output signal (low). After this, the counter keeps increasing until it reaches the top value. After the counter reaches the top value, it counts down or starts from zero, depending on the \ac{PWM} mode.
 
-The \ac{PWM} mode is defined by the motor drive algorithm. In the case of the trapezoidal drive, since the \ac{PWM} signal is only applied to one branch at a time, the counter restarts from zero after the top value is reached, switching the output signal immediately after this. This mode is called Edge-Aligned \ac{PWM}.
+The \ac{PWM} mode is defined by the motor drive algorithm. In the case of the trapezoidal drive, since the \ac{PWM} signal is only applied to one branch at a time, the counter restarts from zero after the top value is reached, switching the output signal immediately after this. This mode is called Edge-Aligned \ac{PWM} (Figure \ref{fig:edge_pwm}).
 
 \begin{figure}[htbp]
 \centering
@@ -419,7 +428,7 @@ The \ac{PWM} mode is defined by the motor drive algorithm. In the case of the tr
 \label{fig:edge_pwm}
 \end{figure}
 
-In the case of the sinusoidal drive, since the three branches have \ac{PWM} signals driving the transistors all the time, in order to reduce the harmonic signals generation due to the commutation between $0V$ and $V_{DC}$, a normal solution is to center the \ac{PWM} signals by counting from the top value back to zero instead of restarting the counter. This way, we don't have three branches commutating from $0V$ to $V_{DC}$ at the same time.
+In the case of the sinusoidal drive, since the three branches have \ac{PWM} signals driving the transistors all the time, in order to reduce the harmonic signals generation due to the commutation between $0V$ and $V_{DC}$, a normal solution is to center the \ac{PWM} signals by, after counting up, counting down from the top value back to zero, resetting the output signal when the counter reaches the compare value. This way, we don't have three branches commutating from $0V$ to $V_{DC}$ at the same time (Figure \ref{fig:center_pwm}).
 
 \begin{figure}[htbp]
 \centering
@@ -428,9 +437,9 @@ In the case of the sinusoidal drive, since the three branches have \ac{PWM} sign
 \label{fig:center_pwm}
 \end{figure}
 
-The implementation of both motor driving techniques implied also the generation of a signal which is complementary to the reference \ac{PWM} signal. This complementary signal is obtained by simply inverting to the output \ac{PWM} signal by modifying one register in the microcontroller. One important aspect to consider regarding this complementary signal, is that it is possible to generate a shot-through effect in the inverter, even if the driver shouldn't allow it. This shot-through is generated due to the non-instantaneous activation of the \ac{MOSFET} gates in the inverter. For example, if the driver dissables the gate on the high-side, and then enables the gate on the low side, the gate on the high-side might still be enabled since the capacitance of the gate might still be charged, which creates a shot-through in the inverter with the duration of the difference between the charge and discharge time of the gates.
+The implementation of both motor driving techniques implied also the generation of a signal which is complementary to the reference \ac{PWM} signal. This complementary signal is obtained by simply inverting to the output \ac{PWM} signal by modifying one register in the microcontroller. One important aspect to consider regarding this complementary signal, is that it is possible to generate a shoot-through effect in the inverter, even if the driver shouldn't allow it. This shoot-through is generated due to the non-instantaneous activation of the \ac{MOSFET} gates in the inverter. For example, if the driver dissables the gate on the high-side, and then enables the gate on the low side, the gate on the high-side might still be enabled since the capacitance of the gate might still be charged, which creates a shoot-through in the inverter with the duration of the difference between the charge and discharge time of the gates (\citeauthor{maximShoot}, \citeyear{maximShoot}).
 
-Due to this shot-through effect due to the gate capacitances, we must generate a dead-time between the main \ac{PWM} signal and its complementary. This delay is defined as the difference between the activation and deactivation time of the \ac{MOSFET} equal to $4.26\mu s$. The activation time is the sum of the on-time plus the rise time and the deactivation time is the sum of the fall time plus the off-time, obtained in \ref{subsec:sw_freq}. The dead-time is also configured by modifying the registers of the advanced timer $TIM1$.
+Due to this shoot-through effect due to the gate capacitances, we must generate a dead-time between the main \ac{PWM} signal and its complementary. This delay is defined as the difference between the activation and deactivation time of the \ac{MOSFET} equal to $4.26\mu s$. The activation time is the sum of the on-time plus the rise time and the deactivation time is the sum of the fall time plus the off-time, obtained in \ref{subsec:sw_freq}. The dead-time is also configured by modifying the registers of the advanced timer $TIM1$.
 
 \begin{figure}[htbp]
 \centering
@@ -439,11 +448,13 @@ Due to this shot-through effect due to the gate capacitances, we must generate a
 \label{fig:dead_time}
 \end{figure}
 
-\subsection{Analog to Digital Converter}
+\subsection{Analog to Digital Converter}\label{sub:adc}
 
-STMicroelectronics' microcontrollers are famous for having one of the most complete \ac{ADC} systems in the market. For this project, this is a plus, since the input of analog values is necessary to apply some of the motor drive algorithms. The \ac{ADC} on the $STM32F4$ microcontrollers family is $12bit$ successive approximation analog-to-digital converter. It can read 16 external analog sources and 3 internal ones (internal temperature, logic voltage and battery voltage). The conversions can be performed in single, continuous, scan or discontinuous mode.
+STMicroelectronics' microcontrollers are famous for having one of the most complete \ac{ADC} systems in the market. For this project, this is a plus, since the input of analog values is necessary to apply some of the motor drive algorithms. The \ac{ADC} on the $STM32F4$ microcontrollers family is $12bit$ successive approximation analog-to-digital converter.
 
-The most important implementation of the \ac{ADC} in this project is used for the current measurement to be applied in the current (and torque) control methods. In a continuous model, the current measured from the system would be continuously updated to be compared with the reference values and to be introduced into the \ac{PI} controller to generate an output voltage signal, which would be applied into the inverter. Since we are dealing with digital models, the implementation differs, but we must approximate it as much as possible to the continuous model to obtain a good performance of our system.
+The most important implementation of the \ac{ADC} in this project is used for the current measurement to be applied in the current (and torque) control methods. The \ac{ADC} was configured in this project to read the two available current signals and a signal proportional to $V_{DC}$ at the same time. 
+
+In a continuous model, the current measured from the system would be continuously updated to be compared with the reference values and to be introduced into the \ac{PI} controller to generate an output voltage signal, which would be applied into the inverter. Since we are dealing with digital models, the implementation differs, but we must approximate it as much as possible to the continuous model to obtain a good performance of our system.
 
 \begin{figure}[htbp]
 \centering
@@ -452,7 +463,7 @@ The most important implementation of the \ac{ADC} in this project is used for th
 \label{fig:pwm_adc_current_2}
 \end{figure}
 
-The implementation of the current measurement is explained in Figure \ref{pwm_adc_current_2}. Based on the windings charge and discharge, which depends on the voltage applied to them, we can obtain the average value of the current flowing through the coil by measing the current at the middle point of the PWM signal generated to drive the inverter. In order to do this, the \ac{ADC} was synchronized with the fourth channel of the advanced timer $TIM1$, which doesn't have a physical output, but it generates a reference signal as well as the other three channels that drive the inverter (Figure \ref{fig:pwm_adc}).
+The implementation of the current measurement is explained in Figure \ref{fig:pwm_adc_current_2}. Based on the windings charge and discharge, which depends on the voltage applied to them, we can obtain the average value of the current flowing through the coil by measing the current at the middle point of the PWM signal generated to drive the inverter. In order to do this, the \ac{ADC} was synchronized with the fourth channel of the advanced timer $TIM1$, which doesn't have a physical output, but it generates a reference signal as well as the other three channels that drive the inverter (Figure \ref{fig:pwm_adc}).
 
 \begin{figure}[htbp]
 \centering
@@ -477,21 +488,29 @@ To do the offset calibration of the current measurement, the $DRV8302$ provides 
 
 \subsection{Algorithms Implementation}
 
-The driving algorithms implemented in this thesis for the \ac{WMU} are two. The first algorithm is the trapezoidal drive, which can be used in an open loop and in a speed control loop. The second one is the sinusoidal drive, which can be used in an open loop, in \ac{FOC} only controlling the current and in \ac{FOC} with a speed control loop. These algorithms depend on other algorithms, like the speed calculation and the \ac{PI} controller.
+The driving algorithms implemented in this thesis for the \ac{WMU} are two. The first algorithm is the trapezoidal drive, which can be used in an open loop and in a speed control loop. The second one is the sinusoidal drive, which can be used in an open loop, in \ac{FOC} only controlling the current and in \ac{FOC} with a speed control loop. These algorithms depend on other algorithms, like the speed calculation and the \ac{PI} controller. 
+
+The trapezoidal and \ac{FOC} driving algorithms are executed by a call of an \acf{ISR} of one of the timers at a specific frequency that will be explained later. 
+
+The speed loop controllers are \ac{PI} controllers executed in a thread of the \ac{OS} every millisecond.
 
 \subsubsection{Speed Calculation}
 
-The speed calculation was made by means of reading the rate of change of the Hall effect sensors value. One clockwise electrical revolution is obtained every time that the Hall effect sensor goes from position 6 to position 1, while a counter-clockwise electrical revolution is obtained when the Hall effect sensor goes from 1 to 6. Following Equation \ref{eq:pole_pairs} we can calculate the mechanical speed of the in-wheel motor, and with this we can estimate the dispalcement speed of the whole robot. The speed calculation function is called everytime that a driving algorithm is called in order to update the driving speed and the Hall effect sensor values.
+The speed calculation was made by means of reading the rate of change of the Hall effect sensors value. One clockwise electrical revolution is obtained every time that the Hall effect sensor goes from position 6 to position 1, while a counter-clockwise electrical revolution is obtained when the Hall effect sensor goes from 1 to 6. Following Equation \ref{eq:pole_pairs} we can calculate the mechanical speed of the in-wheel motor, and with this we can estimate the dispalcement speed of the whole robot. The speed calculation function is called every time that a driving algorithm is called in order to update the driving speed and the Hall effect sensor values.
 
-\vfill
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\textwidth]{Images/flowcharts/speed_calculation.png} 
-\caption[Speed Calculation Flowchart]{Speed Calculation Flowchart}
-\label{fig:speed_flow}
-\end{figure}
-\vfill
-\clearpage
+\subsubsection{Continuous Angular Position Definition}
+
+As mentioned before, the Orbis angular position encoder is connected to the microcontroller through an $RS422$ transceiver that manages the interaction between their different physical layers. The \ac{SSI} interface is practically an \ac{SPI} interface, with the difference that the \ac{SSI} implemented in the Orbis sensor uses $24bit$ messages, while the \ac{SPI} protocol uses $8bit$ or $16bit$ messages.
+
+The message of the encoder is structured as follows: $bit23$ to $bit10$ contain the encoder position data; $bit9$ and $bit8$ provide the general status of the encoder (data valid or invalid); $bit7$ to $bit0$ provide a detailed status about the previous two bits.
+
+The \ac{SPI} is configured as receive-only master mode, which sends the clock signal to the encoder, expecting a response signal at the same transmission rate. Since the largest message length that the \ac{SPI} protocol of the microcontroller supports is $16bit$, we send only a 16 pulses clock signal, obtaining only the 16 \acf{MSB} of the message from the encoder. 
+
+To obtain the angular position, we do a bit-wise operation in order to read only the 14 \ac{MSB} of the message, which contain the angular position. This binary value is translated into radians, to which an angular slip is added (explained in \ref{subsection:angular_sensors}) to define the absolute electrical angular position of the encoder due to the rotor angular position transmission adopted (\ref{sub:gears}).
+
+It is stated in the datasheet of the encoder that the maximum clock frequency is $500kHz$, unless a "Delay First Clock" function is implemented, which would increase the frequency to $2.5MHz$, but such function is not explained.
+
+If we consider a clock frequency equal to $500kHz$ for a $24bit$ message, the message has a duration of $48\mu s$. After every message we must wait a transfer timeout $t_{M}$ equal to $16\mu s$ and a pause time $t_{p}$ equal to $20\mu s$ in order to get a new message from the encoder. These delays add up to the message duration to give a total transmission duration of $84\mu s$, which defines the maximum transmission frequency of the encoder, which is equal to $11.9kHz$.
 
 \subsection{Proportional-Integral Controller}
 
@@ -520,16 +539,34 @@ In the speed loop implementation for the trapezoidal drive, the saturation value
 
 \subsubsection{Trapezoidal Drive}
 
-The trapezoidal drive was implemented by following the six-step sequence with a \ac{PWM} signal in the high-side transistor, a complementary \ac{PWM} signal on the low-side transistor of the same branch, and a low-side transistor in another branch enabled, as explained in \ref{subsection:trapdrive}: depending on the expected direction and on the position of the hall-effect sensors, apply a driving signal on the branch and low-side transistor specified.
+The trapezoidal drive was implemented by following the six-step sequence with a \ac{PWM} signal in the high-side transistor, a complementary \ac{PWM} signal on the low-side transistor of the same branch (positive branch), and enabling a low-side transistor in another branch (negative branch), as explained in \ref{subsection:trapdrive}.
 
-The algorithm was implemented in a function that is called at a frequency that can be specified by the user. Also the \ac{PWM} signal is driven at a frequency that can be modified. One of the first steps of the algorithm is to compare the current status of the Hall effect sensors with the previous one, in order to avoid modifying registers if it is not needed. This condition applies only when the speed is larger than $5 rad/s$, because if the motor hasn't started moving, the hall-effect sensors won't change and the algorithm wouldn't be executed.
+The algorithm was implemented in a function that is called by the \ac{ISC} at a frequency that can be specified by the user . Also the \ac{PWM} signal is driven at a frequency that can be modified depending on the motor characteristic time $\tau$. 
+
+One of the first steps of the algorithm is to compare the current status of the Hall effect sensors with the previous one, in order to avoid modifying registers if it is not needed and to reduce the usage of the microcontroller resources. This condition applies only when the speed is larger than $5 rad/s$, because, if the motor hasn't started moving, the hall-effect sensors won't change and the algorithm wouldn't be executed.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=8cm]{Images/trap_comp.png} 
-\caption[Trapezoidal drive with complementary PWM]{Trapezoidal drive signals with complementary PWM in "high-side" enabled branch}
+\caption[Trapezoidal drive with complementary PWM]{Trapezoidal drive signals with complementary PWM in leading branch}
 \label{fig:trap_comp}
 \end{figure}
+
+\subsubsection{Field Oriented Control Implementation}
+
+The \ac{FOC} algorithm was implemented following the explanation from \ref{sub:FOC}, which is a straight sequence. The maximum frequency at which the \ac{FOC} loop can be called is determined by the maximum frequency of the Orbis encoder, since the angular position of the rotor must be detected every time that the loop is executed. Due to this, the \ac{ISR} calls the \ac{FOC} loop every $100\mu s$.
+
+One important thing to be considered in the case of ROBI' for the implementation of the \ac{FOC}, is that the system 
+
+\vfill
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{Images/flowcharts/speed_calculation.png} 
+\caption[Speed Calculation Flowchart]{Speed Calculation Flowchart}
+\label{fig:speed_flow}
+\end{figure}
+\vfill
+%\clearpage
 
 \vfill
 \begin{figure}[htbp]
@@ -539,9 +576,7 @@ The algorithm was implemented in a function that is called at a frequency that c
 \label{fig:trap_flow}
 \end{figure}
 \vfill
-\clearpage
-
-\subsubsection{Field Oriented Control Implementation}
+%\clearpage
 
 \vfill
 \begin{figure}[htbp]
@@ -551,11 +586,15 @@ The algorithm was implemented in a function that is called at a frequency that c
 \label{fig:foc_flow}
 \end{figure}
 \vfill
-\clearpage
+%\clearpage
 
-\subsubsection{Speed Control Loop}
 
-(...)\\
+
+\begin{sidewaysfigure}[ht]
+    \includegraphics[width=\textwidth]{Images/pictures/pic4.png} 
+    \caption[Trapezoidal drive implemented on in-wheel motor mounted on ROBI']{Trapezoidal drive implemented on in-wheel motor mounted on ROBI'}
+    \label{fig:pic4}
+\end{sidewaysfigure}
 
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 %---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -564,28 +603,77 @@ The algorithm was implemented in a function that is called at a frequency that c
 \clearpage
 \section{Test Setup}
 
-This section is a preamble to the next chapter...
+This section explains the implementation of the test bench developed to measure the driving capabilities of the \ac{WMU}. It is also a preamble to the next chapter, which shows the results of the implementation of the different driving methods under different test conditions.
 
 \subsection{Measurement Board}
 
-(...)\\
+In order to be able to obtain the voltage and current waveforms of the motor, it was necessary to condition those signals to be measured by an oscilloscope or by any other device. With this aim, a measurement board was developed. The schematic files of this measurement board can be found in Appendix \ref{appendix:mmb_schematics}.
+
+The board was designed to acquire data by means of connecting an oscilloscope to the circuit through test points or by setting up an embedded system to acquire the information, transform it and transfer it to a \ac{UI} by \ac{USB} or any other digital communication protocol available. The embedded system can be setup by soldering an Atmel microcontroller directly to the board or by connecting an Arduino-like device. Since the Arduino doesn't have a sampling frequency fast enough to read the analog signals of this project, we used the approach of connecting an oscilloscope directly to the board through the test points.
+
+For future reference, it is possible to use other more powerful devices instead of the Arduino to acquire the signals, like a Nucleo board, by STMicroelectronics, which has the same pinout of an Arduino board.
+
+The operating voltage levels of the board can be selected depending on the available power supply and the operating logic levels of the embedded system.
+
+In order to obtain the information of the motor, its terminals must connected to the board by means of three large "banana" connectors. The current of the motor flows through wide copper pads, which are connected to voltage test points, passing through the current transducers and connected to other three banana terminals, which are connected to the \ac{WMU}.
 
 \subsubsection{Voltage Measurement}
 
-(...)\\
+The voltage of the motor windings was measured from the motor terminals with reference to ground. This voltage can be acquired by connecting an oscilloscope to the test points available for this, or it can be measured by an embedded system.
+
+In order to condition the signal to be read by the embedded system, it was necessary to implement a circuit with operational amplifiers to reduce the measured voltage levels of the motor to logic levels. The gain of the amplifiers can be set by modifying the dip-switches in the board.
 
 \subsubsection{Current Measurement}
 
-(...)\\
+The current of the motor was measured between the driver and the motor terminals. It was obtained by means of the LEM current transducer HXS 20-NP, which is a Hall effect sensor that can be configured to measure up to 60A, changing the sensitivity of the transducer by modifying its pinout interconnection, which changes the current distribution inside the sensor, increasing or reducing its effect over the Hall effect sensor.
 
-\subsection{Data acquisition}
-usb, labview, thermite
-(...)\\
+As in the case of the voltage measurements, the signal can be also obtained by the embedded sytem and its conditioned by operational amplifier circuits with an adjustable gain.
 
-\subsection{Robi Setup}
+\subsection{User Interface}
 
-(...)\\
+The board was connected to a \ac{UI} by means of a USB-Serial transceiver, which was connected to the available \ac{UART} port.
 
-\subsubsection{Load Tests}
-Marelli Generator as Load
-(...)\\
+The \ac{UI} was developed in LabView because of the ease of implementation of automatic serial communication algorithms which allow us to control different variables of the \ac{WMU}, like the reference input values ($I_{q,ref}$, $I_{d,ref}$, $\omega_{ref}$) and the parameters of the controllers implemented ($K_{P}$ and $K_{I}$). It is also possible to obtain and plot different values measured and calculated by the microcontroller, like the angular position and speed of the rotor and the values of the measured currents and voltages.
+
+This \ac{UI} allowed us to run the tests of the capabilities of the \ac{WMU}.
+
+\subsection{ROBI' Setup}
+
+The \ac{WMU} and the measurement board were mounted into ROBI' with the objective of having a mechanically stable arrangement of the components.
+
+In order to test the torque development of the in-wheel motors, ROBI' was mounted in a torque test bench, which consists on a \ac{DC} current generator with a resistance connected to its output. The \ac{DC} current generator was manufactured by Ercole Marelli \& CSA -- Milano.
+
+One of the in-wheel motors mounted on ROBI' was attached to the shaft of the generator by means of a custom-designed coupler, which was 3D printed in PLA plastic. This coupler was attached to the rim of the in-wheel motor by replacing three of the $M3$ screws that attach the rim to the wheel for larger ones in order to be able to attach it.
+
+The generator is mounted into a large base, holding it by its rotor (with the use of bearings) and not by its stator. This configuration allows the measurement of the torque generated by means of a load cell, which measures a compression or a tension force applied to it, proportional to the torque applied to the generator, which depends on the power that is being generated to energise the load connected to its terminals. The power generation depends on the field excitement of the generator, therefore, we were able to define a constant torque at a given speed by changing its excitation voltage.
+
+The load cell information was obtained by means of an instrumentation amplifier, model HX711, which has a digital interface. The amplifier output was connected to an Arduino, which translated the information of the sensor into an applied torque, equal to the force measured multiplied by the distance from the center of the generator to the load cell, whose direction is practically tangential to the generator circumference. Before each test was realized, the torque measurement was calibrated, following a procedure like the one applied for the current offset calibration (\ref{sub:adc}).
+
+\begin{table}[]
+\centering
+\caption{Marelli DC current generator characteristics in function on its rotation speed}
+\label{table:marelli}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Power 					& $10/40 kW$ \\
+Voltage 				& $110/440 V$ \\
+Current 				& $91 A$ \\
+Speed   				& $750/3000 RPM$ \\
+Excitation voltage     	& $220 V$ \\
+Excitation current      & $1.5 A$ \\ 
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=10cm]{Images/pictures/pic3.png} 
+\caption[WMU connected to measurement board]{WMU connected to measurement board, mounted in ROBI's structure}
+\label{fig:foc_flow}
+\end{figure}
+
+\begin{sidewaysfigure}[ht]
+    \includegraphics[width=\textwidth]{Images/pictures/pic1.png} 
+    \caption[In-wheel motor attached to Marelli DC generator]{In-wheel motor attached to Marelli DC generator}
+    \label{fig:pic1}
+\end{sidewaysfigure}

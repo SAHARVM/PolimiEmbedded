@@ -139,7 +139,7 @@ If we consider the loop from Figure \ref{fig:lorentz_law} and Equation \ref{eq:B
     \subfloat[$\delta = 0$\label{subfig-3:alignment_3}]{%
       	\includegraphics[width=0.28\textwidth]{Images/alignment_3.png}
     }
-    \caption{Visual explanation of the alignment principle. In this Figure we can see the side $bc$ of the loop from Figure \ref{fig:lorentz_law}, which is spinning around the $y$ axis. The alignment torque between $B$ and $B'$ is the largest in the configuration \ref{subfig-1:alignment_1} and nule in the configuration \ref{subfig-3:alignment_3}.}
+    \caption[Visual explanation of the alignment principle]{Visual explanation of the alignment principle. In this Figure we can see the side $bc$ of the loop from Figure \ref{fig:lorentz_law}, which is spinning around the $y$ axis. The alignment torque between $B$ and $B'$ is the largest in the configuration \ref{subfig-1:alignment_1} and nule in the configuration \ref{subfig-3:alignment_3}.}
     \label{fig:alignment}
     %https://www.basilnetworks.com/article/motors/brushlessmotors.html
 \end{figure}
@@ -160,7 +160,7 @@ In the case of the \acf{DC} motor, the perpendicularity condition between the ma
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=8cm]{Images/dc_motor.png} 
+\includegraphics[width=6cm]{Images/dc_motor.png} 
 \caption[DC Motor Scheme]{Basic schematic representation of the \ac{DC} motor using the same loop represented in Figure \ref{fig:lorentz_law}}
 \label{fig:dc_motor}
 \end{figure}
@@ -233,7 +233,7 @@ which defines, by imposing a voltage difference between the terminals of the loo
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=8cm]{Images/torque_speed.png} 
+\includegraphics[width=5cm]{Images/torque_speed.png} 
 \caption[Torque-Speed Curve]{Basic representation of the Torque vs Angular Speed characteristic curve of an electric motor}
 \label{fig:torque_speed}
 \end{figure}
@@ -257,7 +257,7 @@ The \acf{PMAC} motor is a type of electrical motor that doesn't need the mechani
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=12cm]{Images/brushless_section.png} 
-	\caption[Brushless Motor Transverse Section]{Brushless motor transverse section (\citeauthor{microchip}, \citeyear{microchip}).}
+	\caption[Brushless Motor Transverse Section]{Brushless motor transverse section (\citeauthor{microchipBLDC}, \citeyear{microchipBLDC}).}
 	\label{fig:brushless_section}
 \end{figure}
 
@@ -298,9 +298,8 @@ so, for example, if we have a motor with 6 \ac{PP} and we want to drive it at $1
     \subfloat[6 Pole Pairs\label{subfig-3:6_pole}]{%
       	\includegraphics[width=0.3\textwidth]{Images/6_pole.png}
     }
-    \caption{Different pole pair configurations}
+    \caption[Different pole pair configurations]{Different pole pair configurations (\citeauthor{polepairs}, \citeyear{polepairs})}
     \label{fig:pole_pairs}
-    %https://www.basilnetworks.com/article/motors/brushlessmotors.html
 \end{figure}
 
 The main characteristics that make the brushless motor a better option for some applications than the \ac{DC} motor are the following:
@@ -394,7 +393,7 @@ Since Power \ac{MOSFET}s have large parasitic capacitances, they can't be driven
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=10cm]{Images/mosfet_drive.png} 
+\includegraphics[width=\textwidth]{Images/mosfet_drive.png} 
 \caption[MOSFET Driving Diagram]{Schematic representation of the components influencing on the driving of a Power MOSFET}
 %http://www.ewh.ieee.org/soc/es/May2001/02/FIG2.JPG
 \label{fig:mosfet_drive}
@@ -410,7 +409,7 @@ The second approach to the sensored angular detection is the use of absolute rot
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=8cm]{Images/hall_effect.png} 
+\includegraphics[width=6cm]{Images/hall_effect.png} 
 \caption[Hall Effect Sensor]{Hall Effect Sensor}
 %http://www.electronics-tutorials.ws/electromagnetism/mag31.gif
 \label{fig:hall_effect}
@@ -422,7 +421,7 @@ The sensorless approach to obtain the angular position of the rotor consists in 
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{Images/sensorless_position.png} 
+\includegraphics[width=8cm]{Images/sensorless_position.png} 
 \caption[Sensorless Angular Detection]{Sensorless Angular Detection Circuit}
 %http://www.electronics-tutorials.ws/electromagnetism/mag31.gif
 \label{fig:hall_effect}
@@ -434,7 +433,7 @@ Knowing the amount of current that is circulating through the motor windings can
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=5cm]{Images/shunt_amp.png} 
+\includegraphics[width=4cm]{Images/shunt_amp.png} 
 \caption[Shunt Resistance Current Detection]{Measurement of the current flowing through a load using a shunt resistance}
 \label{fig:shunt_amp}
 \end{figure}
@@ -517,14 +516,14 @@ The six-step commutation is produced by following the sequence described in Tabl
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{Images/6step_coils.png} 
-\caption[Six Step Commutation Currents]{Current flowing through the coils of the PMAC motor in the 6-step commutation sequence}
+\caption[Six Step Commutation Currents]{Current flowing through the coils of the PMAC motor in the 6-step commutation sequence (\citeauthor{microchipBLDC}, \citeyear{microchipBLDC})}
 \label{fig:six_step_coils}
 \end{figure}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{Images/6step.png} 
-\caption[Six Step Commutation]{Six-Step commutation elements: Hall effect sensor signal, BEMF and output torque}
+\caption[Six Step Commutation]{Six-Step commutation elements: Hall effect sensor signal, BEMF, current and output torque  (\citeauthor{microchipBLDC}, \citeyear{microchipBLDC})}
 \label{fig:six_step}
 \end{figure}
 
@@ -533,7 +532,7 @@ Due to the synchronous configuration of the \ac{PMAC} motors, the six-step commu
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=8cm]{Images/dutycycle.png} 
-\caption[PWM Signal]{Pulse Width Modulation Signal}
+\caption[PWM Signal]{Pulse width modulation signal components}
 \label{fig:dutycycle}
 \end{figure}
 
@@ -610,7 +609,7 @@ where we can see that the torque applied by the motor is equal to the current fl
 \label{fig:torque_trapezoidal}
 \end{figure}
 
-\subsection{Field Oriented Control}
+\subsection{Field Oriented Control}\label{sub:FOC}
 
 The \acf{FOC} or Vector Control, is technique that is applied with aims of controlling the current (and therefore the torque) of the \ac{PMAC} motor in the same way that the current of a \ac{DC} motor is controlled. This is done because the \ac{DC} motor has the advantage that, in any case, the magnetic field of the rotor is always synchronized with the magnetic field of the permanent magnets attached to its stator due to the mechanical commutators, which makes it very easy to control. Instead, the \ac{PMAC} motors must be synchronized by means of applying different driving algorithms depending on the rotor angular position, as mentioned before in this chapter. 
 
@@ -622,7 +621,7 @@ The control of the direct current vector $I_{d}$ allows the implementation of "f
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=8cm]{Images/foc_current.png} 
+\includegraphics[width=10cm]{Images/foc_current.png} 
 \caption[Field Oriented Control Blocks Diagram]{Field Oriented Control Blocks Diagram}
 \label{fig:foc_current}
 \end{figure}
@@ -714,7 +713,7 @@ Since by applying the \ac{FOC} method to \ac{PMAC} motors we can achieve a good 
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=10cm]{Images/foc_speed.png} 
+\includegraphics[width=12cm]{Images/foc_speed.png} 
 \caption[Field Oriented Control applied in Speed Control]{Field Oriented Control Applied in Speed Control}
 \label{fig:foc_speed}
 \end{figure}

@@ -1,17 +1,35 @@
 \chapter{Conclusion} \label{chap:conclusion}
 
-(...)\\
+Since we were able to drive the in-wheel \ac{PMSM} motor, we can conclude that the implementation of the driving algorithms on the \ac{WMU} based on the hardware design of the VESC board was successful. But, after analizing the implementation procedure and the test results, we can also conclude that the architecture proposed is not optimal for such motor drive system.
 
-\lipsum[1]
+The main positive aspects of the architecture implemented are the following:
+\begin{itemize}
+	\item The driver $DRV8302$ is a useful tool mainly due to three reasons: it solves all the issues related to \ac{MOSFET} driving and the current provided to charge the gate is enough to have a good driving frequency; it protects the board from overcurrent and undervoltage conditions; it provides a voltage regulator, which reduces the area and the components on the board.
+	\item The microcontroller capacity was not a limitation for the implementation of the algorithms required to drive the motor. Also, the implementation of Miosix as the operating system for the \ac{WMU} simplified the development of those algorithms.
+\end{itemize}
 
-\section{Bla bla bla}
+The main issues with the implementation following this topology are the following:
+\begin{itemize}
+	\item The driver $DRV8302$ provides only two shunt current amplifiers, which was one of the reasons of the generation of an offset in the driving signals in the implementation of the \ac{FOC}, which reduces the efficiency of the motor.
+	%\item The maximum power dissipation of the proposed \ac{MOSFET} for the implementation of the inverter is lower than the rated power of the in-wheel motor. Due to this, the \ac{WMU} will never be able to drive the motor to its nominal torque.
+	\item The VESC board doesn't consider any heat dissipation strategy for the power \ac{MOSFET}s, which reduces their power dissipation capacity and it might lead to a failure in the system.
+	\item The model selected of the Orbis sensor becomes a limiting factor for the implementation of the \ac{FOC} due to its maximum transmission frequency.
+\end{itemize}
 
-(...)\\
+\section{Changes Proposal}
 
-\lipsum[2]
+Based on the previous analysis of the development of the \ac{WMU}, we can propose the following changes for a future development:
+\begin{itemize}
+	\item Since the only problem with the $DRV8302$ driver was that there are only two shunt current amplifiers, it can be replaced by a more recent version, the $DRV8320$, which includes the same functionalities but it considers three shunt current amplifiers.
+	\item 
+	\item Due to the large currents flowing through the board, we need to use wires with a larger diameter than the one used in the developed system to avoid melting them. The problem with using wider wires is that it becomes mechanically unsafe to have them soldered directly to the board, so it is important to consider the use of connectors for the power supply and for the motor terminals.
+	\item The last proposal is to change the model of the Orbis encoder to one with a higher transmission frequency to avoid the frequency limitation in the \ac{FOC} algorithm.
+\end{itemize}
 
 \section{Future Work}
 
-(...)\\
+The implementation of some of the requirements for the \ac{WMU} is still pending.
 
-\lipsum[3]
+One of those requirements is the communitacion between \ac{ECU}s through the \ac{CAN} communication protocol. As mentioned before, the drivers for this were provided by the Skyward Experimental Rocketry team, therefore, its implementation should be simple.
+
+Another important point to work on, is the implementation of strategies to improve the efficiency of the motor, like the reduction of current offsets by using mean value control techniques, and the reduction of harmonic signals by the implementation of other driving methods, like the space vector modulation.
